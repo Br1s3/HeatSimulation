@@ -2,7 +2,7 @@
 #include <raylib.h>
 
 #define MESHGRIDLIB_IMPLEMENTATION
-#include "meshgridlib.h"
+#include "../meshgridlib.h"
 
 #define FPS 30
 #define MESHGRID 20

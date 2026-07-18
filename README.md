@@ -1,8 +1,5 @@
+# Program that simulates the heat equation
 
-## References
-
-- https://fr.wikipedia.org/wiki/%C3%89quation_de_la_chaleur
-- http://www.lmm.jussieu.fr/~lagree/COURS/MECAVENIR/cours4_eqchal_loc.pdf
 
 
 ## Heat equation
@@ -13,11 +10,16 @@
 \end{aligned}
 ```
 
-## Normalisation formula
+## normalization formula
 
 ```math
-#begin{aligned}
+\begin{aligned}
 	X_{new} &= \frac{X - X_{min}}{X_{max} - X_{min}}
-#end{aligned}
-
+\end{aligned}
 ```
+
+
+## References
+
+- https://fr.wikipedia.org/wiki/%C3%89quation_de_la_chaleur
+- http://www.lmm.jussieu.fr/~lagree/COURS/MECAVENIR/cours4_eqchal_loc.pdf
