@@ -1,6 +1,7 @@
 # Program that simulates the heat equation
 
-
+ > [!WARNING] 
+ > Does not work yet!
 
 ## Heat equation
 
