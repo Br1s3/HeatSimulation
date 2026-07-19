@@ -4,8 +4,8 @@
 #define MESHGRIDLIB_IMPLEMENTATION
 #include "../meshgridlib.h"
 
-#define FPS 60
-#define MESHGRID 100
+#define FPS 30
+#define MESHGRID 20
 #define WIDTH (8*100)
 #define HEIGHT (6*100)
 
@@ -21,21 +21,15 @@ int main()
     printf("X-wind: %d,, Y-wind: %d\n", wind.x, wind.y);
     printf("Grid: %d,, meshgrid: %d\n", wind.grid, MESHGRID);
 
-    int i = 0, j = 0;
-    // unsigned char R = 0, B = 0xff;
     while (!WindowShouldClose()) {
 	if (IsKeyDown(KEY_SPACE)) {BeginDrawing(); EndDrawing(); continue;}
-	// printf("i: %d, : %d:: x-grid: %d, y-grid: %d\n", i, j, wind.grid, wind.grid);
-	if (i++ >= wind.x) {
-	    i = 0;
-	    if (j++ >= wind.y) j = 0;
-	}
-
 	BeginDrawing();
 	ClearBackground(BLACK);
-	// DrawRectangle(wind.Offset.x + (i*wind.x), wind.Offset.y + (j*wind.y), wind.x, wind.y, WHITE);
-	DrawRectangle(MESHOFFSET_X(wind, i), MESHOFFSET_Y(wind, j), wind.grid, wind.grid, WHITE);
-	// DrawRectangle(wind.Offset.x + (i*wind.x), wind.Offset.y + (j*wind.y), wind.x, wind.y, (Color){R++, 0, 0, 0xff});
+	for (int x = 0; x < wind.x; x++) {
+	    for (int y = 0; y < wind.y; y++) {
+		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){((float)x/(float)wind.x)*0xff, 0x00, ((float)y/(float)wind.y)*0xff, 0xff});
+	    }
+	}
 	DrawFPS(10, 10);
 	EndDrawing();
     }

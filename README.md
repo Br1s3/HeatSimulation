@@ -22,6 +22,8 @@
 
 - https://fr.wikipedia.org/wiki/%C3%89quation_de_la_chaleur
 - http://www.lmm.jussieu.fr/~lagree/COURS/MECAVENIR/cours4_eqchal_loc.pdf
+(Simulation of laplacian)
+- https://visualpde.com/sim/
 
 ## TODO:
 - Add the console view

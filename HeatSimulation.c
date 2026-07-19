@@ -9,7 +9,7 @@
 #include "meshgridlib.h"
 
 #define FPS 30
-#define MESHGRID 30
+#define MESHGRID 20
 #define WIDTH (8*100)
 #define HEIGHT (6*100)
 
@@ -25,11 +25,15 @@
 	for (int i = 0; i < (h); i++) dest[i] = src[i];	\
     } while (0)
 
+double norm(double x, double xmin, double xmax)
+{
+    return (x - xmin)/(xmax - xmin);
+}
 
 double heat_equ(double px, double py, double t, double **T, double Lx, double Ly)
 {
     double res = 0;
-    static double tmp2[N-1][N-1] = {0};
+     double tmp2[N-1][N-1] = {0};
     if (tmp2[0][0] == 0) {
 	for (int n = 1; n < N; n++) {
 	    for (int m = 1; m < N; m++) {
@@ -52,10 +56,6 @@ double heat_equ(double px, double py, double t, double **T, double Lx, double Ly
     return res;
 }
 
-double norm(double x, double xmin, double xmax)
-{
-    return (x - xmin)/(xmax - xmin);
-}
 
 int main()
 {
@@ -67,73 +67,74 @@ int main()
     Window wind;
     SetMeshGrid(&wind, WIDTH, HEIGHT, MESHGRID);
 
-
-    double pl[wind.grid][wind.grid];
-    for (int i = 0; i < wind.grid; i++) {
-	for (int j = 0; j < wind.grid; j++) {
+    double pl[wind.x][wind.y];
+    for (int i = 0; i < wind.x; i++) {
+	for (int j = 0; j < wind.y; j++) {
 	    pl[i][j] = 0;
 	}
     }
 
+    // // pl[wind.grid/2-3][wind.grid/2-3].p.x = 0x8f; pl[wind.grid/2-3][wind.grid/2-3].p.y = 0x8f;
+    // pl[wind.x/2-3][wind.y/2-2] = 200;
+    // pl[wind.x/2-3][wind.y/2-1] = 200;
+    // pl[wind.x/2-3][wind.y/2] = 200;
+    // pl[wind.x/2-3][wind.y/2+1] = 200;
+    // pl[wind.x/2-3][wind.y/2+2] = 200;
+    // // pl[wind.grid/2-3][wind.grid/2+3] = 200; pl[wind.grid/2-3][wind.grid/2+3].p.y = 200;
+    
+    // pl[wind.x/2-2][wind.y/2-3] = 200;
+    // pl[wind.x/2-1][wind.y/2-3] = 200;
+    // pl[wind.x/2][wind.y/2-3] = 200;
+    // pl[wind.x/2+1][wind.y/2-3] = 200;
+    // pl[wind.x/2+2][wind.y/2-3] = 200;
+    // // pl[wind.grid/2+3][wind.grid/2-3] = 200; pl[wind.grid/2+3][wind.grid/2-3].p.y = 200;
+    
+    // pl[wind.x/2-2][wind.y/2+3] = 200;
+    // pl[wind.x/2-1][wind.y/2+3] = 200;
+    // pl[wind.x/2][wind.y/2+3] = 200;
+    // pl[wind.x/2+1][wind.y/2+3] = 200;
+    // pl[wind.x/2+2][wind.y/2+3] = 200;
+    // // pl[wind.grid/2+3][wind.grid/2+3] = 200; pl[wind.grid/2+3][wind.grid/2+3].p.y = 200;
+    
+    // pl[wind.x/2+3][wind.y/2-2] = 200;
+    // pl[wind.x/2+3][wind.y/2-1] = 200;
+    // pl[wind.x/2+3][wind.y/2] = 200;
+    // pl[wind.x/2+3][wind.y/2+1] = 200;
+    // pl[wind.x/2+3][wind.y/2+2] = 200;
 
-    // pl[wind.grid/2-3][wind.grid/2-3].p.x = 0x8f; pl[wind.grid/2-3][wind.grid/2-3].p.y = 0x8f;
-    pl[wind.grid/2-3][wind.grid/2-2] = 0x8f;
-    pl[wind.grid/2-3][wind.grid/2-1] = 0x8f;
-    pl[wind.grid/2-3][wind.grid/2] = 0x8f;
-    pl[wind.grid/2-3][wind.grid/2+1] = 0x8f;
-    pl[wind.grid/2-3][wind.grid/2+2] = 0x8f;
-    // pl[wind.grid/2-3][wind.grid/2+3] = 0x8f; pl[wind.grid/2-3][wind.grid/2+3].p.y = 0x8f;
+    for (int i = 0; i < wind.y; i++) pl[1][i] = 200;
+    for (int i = 0; i < wind.y; i++) pl[wind.x-2][i] = 200; 
+    for (int i = 0; i < wind.x; i++) pl[i][1] = 200;
+    for (int i = 0; i < wind.x; i++) pl[i][wind.y-2] = 200;
     
-    pl[wind.grid/2-2][wind.grid/2-3] = 0x8f;
-    pl[wind.grid/2-1][wind.grid/2-3] = 0x8f;
-    pl[wind.grid/2][wind.grid/2-3] = 0x8f;
-    pl[wind.grid/2+1][wind.grid/2-3] = 0x8f;
-    pl[wind.grid/2+2][wind.grid/2-3] = 0x8f;
-    // pl[wind.grid/2+3][wind.grid/2-3] = 0x8f; pl[wind.grid/2+3][wind.grid/2-3].p.y = 0x8f;
-    
-    pl[wind.grid/2-2][wind.grid/2+3] = 0x8f;
-    pl[wind.grid/2-1][wind.grid/2+3] = 0x8f;
-    pl[wind.grid/2][wind.grid/2+3] = 0x8f;
-    pl[wind.grid/2+1][wind.grid/2+3] = 0x8f;
-    pl[wind.grid/2+2][wind.grid/2+3] = 0x8f;
-    // pl[wind.grid/2+3][wind.grid/2+3] = 0x8f; pl[wind.grid/2+3][wind.grid/2+3].p.y = 0x8f;
-    
-    pl[wind.grid/2+3][wind.grid/2-2] = 0x8f;
-    pl[wind.grid/2+3][wind.grid/2-1] = 0x8f;
-    pl[wind.grid/2+3][wind.grid/2] = 0x8f;
-    pl[wind.grid/2+3][wind.grid/2+1] = 0x8f;
-    pl[wind.grid/2+3][wind.grid/2+2] = 0x8f;
-
-    
-    double t = 0;
-    STAT_ALLOC(pl, T, double, wind.grid);
+    STAT_ALLOC(pl, T, double, wind.x);
 
     double Tmin = 0, Tmax = 0.01;
-    for (int i = 0; i < wind.grid; i++) {
-	for (int j = 0; j < wind.grid; j++) {
+    for (int i = 0; i < wind.x; i++) {
+	for (int j = 0; j < wind.y; j++) {
 	    if (Tmax < T[i][j]) Tmax = T[i][j];
 	    if (Tmin > T[i][j]) Tmin = T[i][j];
 	}
     }
-    
 
+    double t = 0;
+    int enter = 0;
     while (!WindowShouldClose()) {
+	if (!IsKeyDown(KEY_ENTER) && enter == 0) {BeginDrawing(); EndDrawing(); continue;}
+	else enter = 1;
 	if (IsKeyDown(KEY_SPACE)) {BeginDrawing(); EndDrawing(); continue;}
 	BeginDrawing();
 	ClearBackground(BLACK);
 
-	for (int x = 0; x < wind.grid; x++) {
-	    for (int y = 0; y < wind.grid; y++) {
-		double temp = heat_equ((double)x, (double)y, t, T, (double)wind.grid, (double)wind.grid);
+	for (int x = 0; x < wind.x; x++) {
+	    for (int y = 0; y < wind.y; y++) {
+		double temp = heat_equ((double)x, (double)y, t, T, wind.x-1, wind.y-1);
 		if (Tmax < temp) Tmax = temp;
 		if (Tmin > temp) Tmin = temp;
 		double tmp = norm(temp, Tmin, Tmax);
-		double Tmoy = (Tmax - Tmax) / 2;
 
-		if (temp < Tmoy) DrawRectangle(wind.Offset.x + (x*wind.x), wind.Offset.y + (y*wind.y), wind.x, wind.y, (Color){0x00, 0x00, (tmp)*0xff, 0xff});
-		else             DrawRectangle(wind.Offset.x + (x*wind.x), wind.Offset.y + (y*wind.y), wind.x, wind.y, (Color){(tmp)*0xff, 0x00, 0x00, 0xff});
-		
-		
+		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){(tmp)*0xff, 0x00, (tmp)*0xff, 0xff});
+
 		// printf("%.3lf ", tmp);
 		// if (carre(temp) > 0.f) printf("%.2lf ", T[x][y]);
 		// else                   printf("     ");
