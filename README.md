@@ -30,3 +30,44 @@
 - Add the mp4 view
 - Try with ODESolver
 - Make the difference between cold and hot spots smoother
+
+
+## Math references:
+- https://fr.wikipedia.org/wiki/Laplacien_discret
+- https://fr.wikipedia.org/wiki/D%C3%A9riv%C3%A9e_seconde_discr%C3%A8te
+- https://fr.wikipedia.org/wiki/Diff%C3%A9rence_finie
+- https://en.wikipedia.org/wiki/Taylor_series
+
+Stencil:
+- https://en.wikipedia.org/wiki/Stencil_(numerical_analysis)
+- https://en.wikipedia.org/wiki/Five-point_stencil#cite_note-1
+- https://en.wikipedia.org/wiki/Nine-point_stencil
+
+Here is the exemple for stencil
+Implicit method
+1   1   1
+0   1   0
+0   0   0
+
+Explicit method
+0   0   0
+0   1   0
+1   1   1
+
+Crank–Nicolson method
+1   1   1
+0   1   0
+1   1   1
+
+
+Here is a test with matrix
+Five-point stencil
+    1    
+1  -4   1
+    1    
+
+
+
+       i+1,0     
+j-1,0    i,j  j+1,0
+       i-1,0     

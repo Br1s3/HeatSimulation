@@ -14,7 +14,6 @@
 #define HEIGHT (6*100)
 
 
-
 #define alpha 0.1f
 #define N 12
 #define carre(x) ((x)*(x))
@@ -59,7 +58,7 @@ double heat_equ(double px, double py, double t, double **T, double Lx, double Ly
 
 int main()
 {
-    double dt = 1;
+    double dt = 0.1;
 
     InitWindow(WIDTH, HEIGHT, "Simulation of the Heat Equation");
     SetTargetFPS(FPS);
@@ -73,34 +72,6 @@ int main()
 	    pl[i][j] = 0;
 	}
     }
-
-    // // pl[wind.grid/2-3][wind.grid/2-3].p.x = 0x8f; pl[wind.grid/2-3][wind.grid/2-3].p.y = 0x8f;
-    // pl[wind.x/2-3][wind.y/2-2] = 200;
-    // pl[wind.x/2-3][wind.y/2-1] = 200;
-    // pl[wind.x/2-3][wind.y/2] = 200;
-    // pl[wind.x/2-3][wind.y/2+1] = 200;
-    // pl[wind.x/2-3][wind.y/2+2] = 200;
-    // // pl[wind.grid/2-3][wind.grid/2+3] = 200; pl[wind.grid/2-3][wind.grid/2+3].p.y = 200;
-    
-    // pl[wind.x/2-2][wind.y/2-3] = 200;
-    // pl[wind.x/2-1][wind.y/2-3] = 200;
-    // pl[wind.x/2][wind.y/2-3] = 200;
-    // pl[wind.x/2+1][wind.y/2-3] = 200;
-    // pl[wind.x/2+2][wind.y/2-3] = 200;
-    // // pl[wind.grid/2+3][wind.grid/2-3] = 200; pl[wind.grid/2+3][wind.grid/2-3].p.y = 200;
-    
-    // pl[wind.x/2-2][wind.y/2+3] = 200;
-    // pl[wind.x/2-1][wind.y/2+3] = 200;
-    // pl[wind.x/2][wind.y/2+3] = 200;
-    // pl[wind.x/2+1][wind.y/2+3] = 200;
-    // pl[wind.x/2+2][wind.y/2+3] = 200;
-    // // pl[wind.grid/2+3][wind.grid/2+3] = 200; pl[wind.grid/2+3][wind.grid/2+3].p.y = 200;
-    
-    // pl[wind.x/2+3][wind.y/2-2] = 200;
-    // pl[wind.x/2+3][wind.y/2-1] = 200;
-    // pl[wind.x/2+3][wind.y/2] = 200;
-    // pl[wind.x/2+3][wind.y/2+1] = 200;
-    // pl[wind.x/2+3][wind.y/2+2] = 200;
 
     for (int i = 0; i < wind.y; i++) pl[1][i] = 200;
     for (int i = 0; i < wind.y; i++) pl[wind.x-2][i] = 200; 
@@ -118,10 +89,10 @@ int main()
     }
 
     double t = 0;
-    int enter = 0;
+    // int enter = 0;
     while (!WindowShouldClose()) {
-	if (!IsKeyDown(KEY_ENTER) && enter == 0) {BeginDrawing(); EndDrawing(); continue;}
-	else enter = 1;
+	// if (!IsKeyDown(KEY_ENTER) && enter == 0) {BeginDrawing(); EndDrawing(); continue;}
+	// else enter = 1;
 	if (IsKeyDown(KEY_SPACE)) {BeginDrawing(); EndDrawing(); continue;}
 	BeginDrawing();
 	ClearBackground(BLACK);
@@ -134,14 +105,8 @@ int main()
 		double tmp = norm(temp, Tmin, Tmax);
 
 		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){(tmp)*0xff, 0x00, (tmp)*0xff, 0xff});
-
-		// printf("%.3lf ", tmp);
-		// if (carre(temp) > 0.f) printf("%.2lf ", T[x][y]);
-		// else                   printf("     ");
 	    }
-	    // printf("\n");
 	}
-	// printf("-------------------------------------------------------------------------------\n");
 
 	DrawFPS(10, 10);
 	EndDrawing();
