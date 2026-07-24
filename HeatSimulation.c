@@ -8,14 +8,14 @@
 #define MESHGRIDLIB_IMPLEMENTATION
 #include "meshgridlib.h"
 
-#define FPS 30
-#define MESHGRID 20
+#define FPS 100
+#define MESHGRID 50
 #define WIDTH (8*100)
 #define HEIGHT (6*100)
 
 
 #define alpha 0.1f
-#define N 12
+#define N 5
 #define carre(x) ((x)*(x))
 
 #define STAT_ALLOC(src, dest, type, h)			\
@@ -32,7 +32,7 @@ double norm(double x, double xmin, double xmax)
 double heat_equ(double px, double py, double t, double **T, double Lx, double Ly)
 {
     double res = 0;
-     double tmp2[N-1][N-1] = {0};
+    static double tmp2[N-1][N-1] = {0};
     if (tmp2[0][0] == 0) {
 	for (int n = 1; n < N; n++) {
 	    for (int m = 1; m < N; m++) {
@@ -58,7 +58,6 @@ double heat_equ(double px, double py, double t, double **T, double Lx, double Ly
 
 int main()
 {
-    double dt = 0.1;
 
     InitWindow(WIDTH, HEIGHT, "Simulation of the Heat Equation");
     SetTargetFPS(FPS);
@@ -73,26 +72,27 @@ int main()
 	}
     }
 
-    for (int i = 0; i < wind.y; i++) pl[1][i] = 200;
-    for (int i = 0; i < wind.y; i++) pl[wind.x-2][i] = 200; 
-    for (int i = 0; i < wind.x; i++) pl[i][1] = 200;
-    for (int i = 0; i < wind.x; i++) pl[i][wind.y-2] = 200;
+    for (int i = 1; i < wind.y-1; i++) pl[1][i] = 200;
+    for (int i = 1; i < wind.y-1; i++) pl[wind.x-2][i] = 200; 
+    for (int i = 1; i < wind.x-1; i++) pl[i][1] = 200;
+    for (int i = 1; i < wind.x-1; i++) pl[i][wind.y-2] = 200;
     
     STAT_ALLOC(pl, T, double, wind.x);
 
-    double Tmin = 0, Tmax = 0.01;
-    for (int i = 0; i < wind.x; i++) {
-	for (int j = 0; j < wind.y; j++) {
-	    if (Tmax < T[i][j]) Tmax = T[i][j];
-	    if (Tmin > T[i][j]) Tmin = T[i][j];
-	}
-    }
+    double Tmin = 0, Tmax = 20;
+    // for (int i = 0; i < wind.x; i++) {
+    // 	for (int j = 0; j < wind.y; j++) {
+    // 	    if (Tmax < T[i][j]) Tmax = T[i][j];
+    // 	    if (Tmin > T[i][j]) Tmin = T[i][j];
+    // 	}
+    // }
 
+    double dt = 0.1;
     double t = 0;
-    // int enter = 0;
+    int enter = 0;
     while (!WindowShouldClose()) {
-	// if (!IsKeyDown(KEY_ENTER) && enter == 0) {BeginDrawing(); EndDrawing(); continue;}
-	// else enter = 1;
+	if (!IsKeyDown(KEY_ENTER) && enter == 0) {BeginDrawing(); EndDrawing(); continue;}
+	else enter = 1;
 	if (IsKeyDown(KEY_SPACE)) {BeginDrawing(); EndDrawing(); continue;}
 	BeginDrawing();
 	ClearBackground(BLACK);
@@ -100,11 +100,12 @@ int main()
 	for (int x = 0; x < wind.x; x++) {
 	    for (int y = 0; y < wind.y; y++) {
 		double temp = heat_equ((double)x, (double)y, t, T, wind.x-1, wind.y-1);
-		if (Tmax < temp) Tmax = temp;
-		if (Tmin > temp) Tmin = temp;
-		double tmp = norm(temp, Tmin, Tmax);
+		// if (Tmax < temp) Tmax = temp;
+		// if (Tmin > temp) Tmin = temp;
+		double T_norm = norm(temp, Tmin, Tmax);
 
-		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){(tmp)*0xff, 0x00, (tmp)*0xff, 0xff});
+		// DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){(tmp)*0xff, 0x00, (tmp)*0xff, 0xff});
+		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){0xff - (1-T_norm)*0xff/2, 0x00, 0xff - (T_norm)*0xff/2, 0xff});
 	    }
 	}
 
