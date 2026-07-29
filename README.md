@@ -16,7 +16,7 @@ Or
 
 ```math
 \begin{aligned}
-	\partial T_{i,j}(t) &= \alpha \left(\frac{T_{i+1,j}(t) - 2T_{i,j}(t) + T_{i-1,j}(t)}{h^2} + \frac{T_{i,j+1}(t) - 2T_{i,j}(t) + T_{i,j-1}(t)}{h^2}\right)
+	\frac{\partial T_{i,j}(t)}{\partial t} &= \alpha \left(\frac{T_{i+1,j}(t) - 2T_{i,j}(t) + T_{i-1,j}(t)}{h^2} + \frac{T_{i,j+1}(t) - 2T_{i,j}(t) + T_{i,j-1}(t)}{h^2}\right)
 \end{aligned}
 ```
 
