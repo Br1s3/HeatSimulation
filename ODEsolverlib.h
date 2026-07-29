@@ -388,7 +388,8 @@ double Diff2Cent3p2D(double h, double f_ip1j, double f_ijp1, double f_ij, double
 
 double Diff2Cent5p2D(double h, double f_ip2j, double f_ip1j, double f_ijp2, double f_ijp1, double f_ij, double f_ijm1, double f_ijm2, double f_im1j, double f_im2j)
 {
-    return (-f_im2j + 16.f*f_ip1j - 30.f*f_ij + 16.f*f_im1j - f_ip2j)/(12.f*SQ_ODESOLVER(h)) + (-f_ijm2 + 16.f*f_ijp1 - 30.f*f_ij + 16.f*f_ijm1 - f_ijp2)/(12.f*SQ_ODESOLVER(h));
+    // (-f_im2j + 16.f*f_ip1j - 30.f*f_ij + 16.f*f_im1j - f_ip2j)/(12.f*SQ_ODESOLVER(h)) + (-f_ijm2 + 16.f*f_ijp1 - 30.f*f_ij + 16.f*f_ijm1 - f_ijp2)/(12.f*SQ_ODESOLVER(h));
+    return (-(f_im2j + f_ijm2) + 16.f*(f_im1j + f_ijm1) - 60.f*f_ij + 16.f*(f_ip1j + f_ijp1) - (f_ip2j + f_ijp2)) / (12.f * SQ_ODESOLVER(h));
 }
 ////////////////////////////////////////////////////////////////////////////////
 

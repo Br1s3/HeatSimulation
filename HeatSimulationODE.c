@@ -8,10 +8,10 @@
 #define MESHGRIDLIB_IMPLEMENTATION
 #include "meshgridlib.h"
 
-#define FPS 100
-#define MESHGRID 300
-#define WIDTH (8*200)
-#define HEIGHT (6*150)
+#define FPS 60
+#define MESHGRID 100
+#define WIDTH (16*100)
+#define HEIGHT (9*100)
 
 
 #define alpha 0.1f
@@ -37,7 +37,7 @@ int heat_equ_raw(int i, int j, double h, double **T, double p)
 {
     // TODO: Find the right Diff2Cent3p2D for the differentes edge t_i-2,j-2 with i=0 and j=2 => t_-2,0
     // return alpha * Diff2Cent3p2D(h, T[i+1][j], T[i][j+1], p, T[i][j-1], T[i-1][j]);
-    return alpha * Diff2Cent5p2D(h, T[i+2][j], T[i+1][j], T[i][j+2], T[i][j+1], p, T[i][j-1], T[i][j-2], T[i-1][j], T[i-2][j]); // TODO: Double check 
+    return alpha * Diff2Cent5p2D(h, T[i+2][j], T[i+1][j], T[i][j+2], T[i][j+1], p, T[i][j-1], T[i][j-2], T[i-1][j], T[i-2][j]);
 }
 
 
@@ -56,20 +56,14 @@ int main()
 	}
     }
 
-    // for (int i = 1; i < wind.y-1; i++) pl[1][i] = 20000;
-    // for (int i = 1; i < wind.y-1; i++) pl[wind.x-2][i] = 20000;
-    // for (int i = 1; i < wind.x-1; i++) pl[i][1] = 20000;
-    // for (int i = 1; i < wind.x-1; i++) pl[i][wind.y-2] = 20000;
+    // for (int i = 1; i < wind.y-1; i++) pl[1][i] = 2000;
+    // for (int i = 1; i < wind.y-1; i++) pl[wind.x-2][i] = 2000;
+    // for (int i = 1; i < wind.x-1; i++) pl[i][1] = 2000;
+    // for (int i = 1; i < wind.x-1; i++) pl[i][wind.y-2] = 2000;
     
     STAT_ALLOC(pl, T, double, wind.x);
 
     double Tmin = 0, Tmax = 20;
-    // for (int i = 0; i < wind.x; i++) {
-    // 	for (int j = 0; j < wind.y; j++) {
-    // 	    if (Tmax < T[i][j]) Tmax = T[i][j];
-    // 	    if (Tmin > T[i][j]) Tmin = T[i][j];
-    // 	}
-    // }
 
     double t = 0;
     double h = 0.1f;
@@ -86,7 +80,7 @@ int main()
 	    if (MousePos.x < 3) MousePos.x = 3;
 	    if (MousePos.y > wind.y-3) MousePos.y = wind.y-3;
 	    if (MousePos.y < 3) MousePos.y = 3;
-	    T[MousePos.x][MousePos.y] = 2000.f;
+	    T[MousePos.x][MousePos.y] = 200.f;
 	}
 
 	BeginDrawing();
@@ -100,20 +94,18 @@ int main()
 		    UNUSED(t);
 		    UNUSED(v);
 		    return heat_equ_raw(x, y, h, T, p);
-		    // return heat_equ_raw(x, y, h, T, p, wind.x, wind.y);
 		}
 
 		double tmp = 0;
 		// if (SymplecticEuler(h, 0, &T[x][y], &tmp, heat_equ) < 0)
-		if (RK4(h, 0, &T[x][y], &tmp, heat_equ) < 0)
+		if (RK4(h, t, &T[x][y], &tmp, heat_equ) < 0)
+		// if (DOPRI45(h, t, 0.001, &T[x][y], &tmp, heat_equ) < 0)
 		    fprintf(stderr, "WARNING: Error calculation\n");
 
-		// if (Tmax < T[x][y]) Tmax = T[x][y];
-		// if (Tmin > T[x][y]) Tmin = T[x][y];
 		double T_norm = norm(T[x][y], Tmin, Tmax);
 
-		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){(T_norm)*0xff, 0x00, (T_norm)*0xff, 0xff});
-		// DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){0xff - (1-T_norm)*0xff/2, 0x00, 0xff - (T_norm)*0xff/2, 0xff});
+		// DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){(T_norm)*0xff, 0x00, (T_norm)*0xff, 0xff});
+		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){0xff - (1-T_norm)*0xff/2, 0x00, 0xff - (T_norm)*0xff/2, 0xff});
 	    }
 	}
 
