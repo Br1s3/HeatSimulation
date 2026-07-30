@@ -6,5 +6,9 @@ gcc HeatSimulation.c -Wall -Wextra -Wno-unused-function -lraylib -lGL -lm -lpthr
 
 gcc HeatSimulationODE.c -Wall -Wextra -Wno-unused-function -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o HeatSimulationODE
 
-./HeatSimulationODE
+gcc HeatSimulationODECons.c -Wall -Wextra -Wno-unused-function -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o HeatSimulationODECons
+
+
+# ./HeatSimulationODECons
+# ./HeatSimulationODE
 # ./HeatSimulation

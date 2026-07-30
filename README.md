@@ -5,6 +5,8 @@
 
 [![Exemple1](./picture/Exemple.png)](/picture)
 
+[![ConsExemple](./picture/ASCIIExemple.png)](/picture)
+
 ## Heat equation
 
 ```math
@@ -40,8 +42,6 @@ Or
 ## TODO:
 - Add the console view
 - Add the mp4 view
-- Try with ODESolver
-- Make the difference between cold and hot spots smoother
 
 
 ## Math references:
