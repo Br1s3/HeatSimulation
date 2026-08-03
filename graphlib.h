@@ -47,12 +47,12 @@ do                                                                             \
 
 typedef struct
 {
-   int x, y;
+    int x, y;
 }COORD;
 
 typedef struct
 {
-   float x, y;
+    float x, y;
 }COORDF;
 
 
@@ -77,36 +77,33 @@ void DrawCircle(uint8_t ***pixels, short width, short height, int x, int y, int 
 
 void PrintConsole(char **pixels, short width, short height)
 {
-   short i, j;
-   char pixels_1D[(width+1) * height];
-   for (i = 0; i < height; ++i) {
-      for (j = 0; j < width+1; ++j) {
-         if      (j < width)     pixels_1D[DEC_GRAPHLIB(i, j)] = pixels[i][j];
-         else if (i < height-1)  pixels_1D[DEC_GRAPHLIB(i, j)] = '\n';
-         else                    pixels_1D[DEC_GRAPHLIB(i, j)] = '\0';
-      }
-   }
+    short i, j;
+    char pixels_1D[(width+1) * height];
+    for (i = 0; i < height; ++i) {
+	for (j = 0; j < width+1; ++j) {
+	    // TODO: Use a static variable to test if &pixels[i][j] == NULL
+            if      (j < width)     pixels_1D[DEC_GRAPHLIB(i, j)] = pixels[i][j];
+            else if (i < height-1)  pixels_1D[DEC_GRAPHLIB(i, j)] = '\n';
+            else                    pixels_1D[DEC_GRAPHLIB(i, j)] = '\0';
+	}
+    }
 
-   MOVETO_GRAPHLIB(0, 0);
-   puts(pixels_1D);
+    MOVETO_GRAPHLIB(0, 0);
+    puts(pixels_1D);
 }
 
 void PrintConsoleSpace(char **pixels, short width, short height)
 {
-   short i, j;
-   MOVETO_GRAPHLIB(0, 0);
-   for (i = 0; i < height; ++i) {
-       for (j = 0; j < width; ++j) {
-	   // TODO: Use a static variable to test this part only one time
-	   // if (&pixels[i][j] == NULL) {
-	   //     fprintf(stderr, "ERROR: Out of memorie\n");
-	   //     exit(1);
-	   // }
-	   putchar(pixels[i][j]);
-	   putchar(' ');
-       }
-       putchar('\n');
-   }
+    short i, j;
+    MOVETO_GRAPHLIB(0, 0);
+    for (i = 0; i < height; ++i) {
+	for (j = 0; j < width; ++j) {
+	    // TODO: Use a static variable to test if &pixels[i][j] == NULL
+	    putchar(pixels[i][j]);
+	    putchar(' ');
+	}
+	putchar('\n');
+    }
 }
 
 
@@ -115,11 +112,7 @@ void ConsoleClear(char **pixels, short width, short height, const char clear)
     short i, j;
     for (i = 0; i < height; ++i) {
 	for (j = 0; j < width; j++) {
-	    // TODO: Use a static variable to test this part only one time
-	    // if (&pixels[i][j] == NULL) {
-	    // 	fprintf(stderr, "ERROR: Out of memorie\n");
-	    // 	exit(1);
-	    // }
+	    // TODO: Use a static variable to test if &pixels[i][j] == NULL
             pixels[i][j] = clear;
 	}
     }
@@ -128,22 +121,14 @@ void ConsoleClear(char **pixels, short width, short height, const char clear)
 void PrintRectangle(char **pixels, short width, short height, int x, int y, int largeur, int hauteur, const char fd)
 {
     short i, j;
-    // for (i = -height/2; i < height/2; i++) {
-	for (i = 0; i < height; i++) {
-            // for (j = -width/2; j < width/2; j++) {
-		for (j = 0; j < width; j++) {
-		    // TODO: Use a static variable to test this part only one time
-		    // if (&pixels[i][j] == NULL) {
-		    // 	fprintf(stderr, "ERROR: Out of memorie\n");
-		    // 	exit(1);
-		    // }
-
-		    if (((j >= x) && (j < x+largeur)) && ((i >= y) && (i < y+hauteur)))
-		    // pixels[i+height/2][j+width/2] = fd;
-		        pixels[i][j] = fd;
-		}
-	    }
-	}
+    for (i = 0; i < height; i++) {
+	for (j = 0; j < width; j++) {
+	    // TODO: Use a static variable to test if &pixels[i][j] == NULL
+            if (((j >= x) && (j < x+largeur)) && ((i >= y) && (i < y+hauteur)))
+		pixels[i][j] = fd;
+        }
+    }
+}
 
 
 void PrintLine(char **pixels, const short width, const short height, int ax, int ay, int bx, int by, const char fd)
@@ -173,10 +158,10 @@ void PrintLine(char **pixels, const short width, const short height, int ax, int
 void PrintCircle(char **pixels, short width, short height, int x, int y, int radius, const char fd)
 {
     short i, j;
-    for (i = -height/2; i < height/2; i++) {
-	for (j = -width/2; j < width/2; j++) {
+    for (i = 0; i < height; i++) {
+	for (j = 0; j < width; j++) {
 	    if ((i-y)*(i-y) + (j-x)*(j-x) <= radius*radius)
-		pixels[i + height/2][j + width/2] = fd;
+		pixels[i][j] = fd;
 	}
     }
 }
@@ -201,14 +186,14 @@ void PrintTriangle(char **pixels, short width, short height, int ax, int ay, int
    float gA, gB, gC;
 
    short x, y;
-   for (y = -height/2; y < height/2; y++) {
-       for (x = -width/2; x < width/2; x++) {
+   for (y = 0; y < height; y++) {
+       for (x = 0; x < width; x++) {
 	   gA = ((float)x*(b.y - c.y) + b.x*(c.y - (float)y) + c.x*((float)y - b.y))/(a.x*(b.y - c.y) + b.x*(c.y - a.y) + c.x*(a.y - b.y));
 	   gB = (a.x*((float)y - c.y) + (float)x*(c.y - a.y) + c.x*(a.y - (float)y))/(a.x*(b.y - c.y) + b.x*(c.y - a.y) + c.x*(a.y - b.y));
 	   gC = (a.x*(b.y - (float)y) + b.x*((float)y - a.y) + (float)x*(a.y - b.y))/(a.x*(b.y - c.y) + b.x*(c.y - a.y) + c.x*(a.y - b.y));
 
            if(gA >= 0 && gB >= 0 && gC >= 0)
-               pixels[y+height/2][x+width/2] = fd;
+               pixels[y][x] = fd;
        }
    }
 }
@@ -249,17 +234,29 @@ void DrawLine(uint8_t ***pixels, short width, short height, int ax, int ay, int 
 
 void DrawCircle(uint8_t ***pixels, short width, short height, int x, int y, int radius, const uint32_t fd)
 {
-   short i, j;
-   for (i = -height/2; i < height/2; i++) {
-      for (j = -width/2; j < width/2; j++) {
-          if ((i-y)*(i-y) + (j-x)*(j-x) <= radius*radius) {
-              pixels[i + height/2][j + width/2][0] |= fd>>(8*3);
-              pixels[i + height/2][j + width/2][1] |= fd>>(8*2);
-              pixels[i + height/2][j + width/2][2] |= fd>>(8*1);
-          }
-      }
-   }
+    short i, j;
+    for (i = 0; i < height; i++) {
+	for (j = 0; j < width; j++) {
+            if ((i-y)*(i-y) + (j-x)*(j-x) <= radius*radius) {
+		pixels[i][j][0] |= fd>>(8*3);
+		pixels[i][j][1] |= fd>>(8*2);
+		pixels[i][j][2] |= fd>>(8*1);
+            }
+	}
+    }
 }
 
 # endif // GRAPHLIB_IMPLEMENTATION
 #endif // GRAPHLIB_H_INCLUED
+
+/***********************************
+TODO:
+- Use a static variable to test if &pixels[i][j] == NULL like:
+    // if (&pixels[i][j] == NULL) {
+	//     fprintf(stderr, "ERROR: Out of memorie\n");
+	//     exit(1);
+    // }
+- Modify t step with 3 if statement if (sqrt(h² + w²) > 1000) t+=0.0001 else reduce
+in PrintLine() and DrawLine()
+- Add DrawRectangle()
+***********************************/

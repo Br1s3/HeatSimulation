@@ -128,12 +128,12 @@ int RK(const double h, double t, double *x, double *v, double (*f)(double, doubl
 #else
 # undef q
 #endif
-    const double A[q][q] = {{0  , 0, 0, 0},
+    static const double A[q][q] = {{0  , 0, 0, 0},
     			   {0.5f, 0, 0, 0},
     			   {0, 0.5f, 0, 0},
     			   {0, 0, 1.f , 0}};
-    const double B[q] = {(1.f/6.f), (1.f/3.f), (1.f/3.f), (1.f/6.f)};
-    const double C[q] = {0,
+    static const double B[q] = {(1.f/6.f), (1.f/3.f), (1.f/3.f), (1.f/6.f)};
+    static const double C[q] = {0,
     			0.5f,
     			0.5f,
     			1.f};
@@ -268,22 +268,22 @@ int DOPRI45(double stepSize, double Time, double err, double *x, double *v, doub
 # undef q
 #endif
 
-    const double B4[q] = {(35.f/384.f)    , 0, (500.f/1113.f)    , (125.f/192.f)    ,-(2187.f/6784.f)     , (11.f/84.f)   , 0};
-    const double B5[q] = {(5179.f/57600.f), 0, (7571.f/16695.f)  , (393.f/640.f)    ,-(92097.f/339200.f)  , (187.f/2100.f), (1.f/40.f)};
-    const double A[q][q] = {{ 0              , 0               , 0               , 0              , 0                , 0          , 0},
-    			   { (1.f/5.f)       , 0               , 0               , 0              , 0                , 0          , 0},
-    			   { (3.f/40.f)      , (9.f/40.f)      , 0               , 0              , 0                , 0          , 0},
-    			   { (44.f/45.f)     ,-(56.f/15.f)     , (32.f/9.f)      , 0              , 0                , 0          , 0},
-    			   { (19372.f/6561.f),-(25360.f/2187.f), (64448.f/6561.f),-(212.f/729.f)  , 0                , 0          , 0},
-    			   { (9017.f/3168.f) ,-(355.f/33.f)    , (46732.f/5247.f), (49.f/176.f)   , -(5103.f/18656.f), 0          , 0},
-    			   { (35.f/384.f)    , 0               , (500.f/1113.f)  , (125.f/192.f)  , -(2187.f/6784.f) , (11.f/84.f), 0}};
-    const double C[q] = {0,
-    			1.f/5.f,
-    			3.f/10.f,
-    			4.f/5.f,
-    			8.f/9.f,
-    			1.f,
-    			1.f};
+    static const double B4[q] = {(35.f/384.f)    , 0, (500.f/1113.f)    , (125.f/192.f)    ,-(2187.f/6784.f)     , (11.f/84.f)   , 0};
+    static const double B5[q] = {(5179.f/57600.f), 0, (7571.f/16695.f)  , (393.f/640.f)    ,-(92097.f/339200.f)  , (187.f/2100.f), (1.f/40.f)};
+    static const double A[q][q] = {{ 0              , 0               , 0               , 0              , 0                , 0          , 0},
+    			          { (1.f/5.f)       , 0               , 0               , 0              , 0                , 0          , 0},
+    			          { (3.f/40.f)      , (9.f/40.f)      , 0               , 0              , 0                , 0          , 0},
+    			          { (44.f/45.f)     ,-(56.f/15.f)     , (32.f/9.f)      , 0              , 0                , 0          , 0},
+    			          { (19372.f/6561.f),-(25360.f/2187.f), (64448.f/6561.f),-(212.f/729.f)  , 0                , 0          , 0},
+    			          { (9017.f/3168.f) ,-(355.f/33.f)    , (46732.f/5247.f), (49.f/176.f)   , -(5103.f/18656.f), 0          , 0},
+    			          { (35.f/384.f)    , 0               , (500.f/1113.f)  , (125.f/192.f)  , -(2187.f/6784.f) , (11.f/84.f), 0}};
+    static const double C[q] = {0,
+    			        1.f/5.f,
+    			        3.f/10.f,
+    			        4.f/5.f,
+    			        8.f/9.f,
+    			        1.f,
+    			        1.f};
 
     dt_struct P[q] = {0};
 
@@ -388,8 +388,7 @@ double Diff2Cent3p2D(double h, double f_ip1j, double f_ijp1, double f_ij, double
 
 double Diff2Cent5p2D(double h, double f_ip2j, double f_ip1j, double f_ijp2, double f_ijp1, double f_ij, double f_ijm1, double f_ijm2, double f_im1j, double f_im2j)
 {
-    // (-f_im2j + 16.f*f_ip1j - 30.f*f_ij + 16.f*f_im1j - f_ip2j)/(12.f*SQ_ODESOLVER(h)) + (-f_ijm2 + 16.f*f_ijp1 - 30.f*f_ij + 16.f*f_ijm1 - f_ijp2)/(12.f*SQ_ODESOLVER(h));
-    return (-(f_im2j + f_ijm2) + 16.f*(f_im1j + f_ijm1) - 60.f*f_ij + 16.f*(f_ip1j + f_ijp1) - (f_ip2j + f_ijp2)) / (12.f * SQ_ODESOLVER(h));
+    return (-f_im2j + 16.f*f_ip1j - 30.f*f_ij + 16.f*f_im1j - f_ip2j)/(12.f*SQ_ODESOLVER(h)) + (-f_ijm2 + 16.f*f_ijp1 - 30.f*f_ij + 16.f*f_ijm1 - f_ijp2)/(12.f*SQ_ODESOLVER(h));
 }
 ////////////////////////////////////////////////////////////////////////////////
 

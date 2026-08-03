@@ -2,9 +2,6 @@
 #include <raylib.h>
 #include <math.h>
 
-// #define ODESOLVERLIB_IMPLEMENTATION
-// #include "ODEsolverlib.h"
-
 #define MESHGRIDLIB_IMPLEMENTATION
 #include "meshgridlib.h"
 
@@ -23,6 +20,10 @@
     do {						\
 	for (int i = 0; i < (h); i++) dest[i] = src[i];	\
     } while (0)
+
+
+#define BLACKPURPLE(x) (Color){(x)*0xff, 0x00, (x)*0xff, 0xff}
+#define BLUERED(x) (Color){0xff - (1-x)*0xff/2, 0x00, 0xff - (x)*0xff/2, 0xff}
 
 double norm(double x, double xmin, double xmax)
 {
@@ -89,10 +90,10 @@ int main()
 
     double dt = 0.1;
     double t = 0;
-    int enter = 0;
+    // int enter = 0;
     while (!WindowShouldClose()) {
-	if (!IsKeyDown(KEY_ENTER) && enter == 0) {BeginDrawing(); EndDrawing(); continue;}
-	else enter = 1;
+	// if (!IsKeyDown(KEY_ENTER) && enter == 0) {BeginDrawing(); EndDrawing(); continue;}
+	// else enter = 1;
 	if (IsKeyDown(KEY_SPACE)) {BeginDrawing(); EndDrawing(); continue;}
 	BeginDrawing();
 	ClearBackground(BLACK);
@@ -104,8 +105,7 @@ int main()
 		// if (Tmin > temp) Tmin = temp;
 		double T_norm = norm(temp, Tmin, Tmax);
 
-		// DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){(tmp)*0xff, 0x00, (tmp)*0xff, 0xff});
-		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, (Color){0xff - (1-T_norm)*0xff/2, 0x00, 0xff - (T_norm)*0xff/2, 0xff});
+		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, BLUERED(T_norm));
 	    }
 	}
 
