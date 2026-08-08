@@ -9,11 +9,11 @@
 #include "meshgridlib.h"
 
 #define FPS 60
-#define MESHGRID 100
-#define WIDTH (16*50)
-#define HEIGHT (9*50)
+#define MESHGRID 200
+#define WIDTH (16*100)
+#define HEIGHT (9*100)
 
-#define alpha 0.1f
+#define alpha 0.01f
 #define UNUSED(x) (void)x
 
 #define BLACKPURPLE(x) (Color){(x)*0xff, 0x00, (x)*0xff, 0xff}
@@ -64,17 +64,18 @@ int main()
 	}
     }
 
-    // for (int i = 1; i < wind.y-1; i++) pl[1][i] = 2000;
-    // for (int i = 1; i < wind.y-1; i++) pl[wind.x-2][i] = 2000;
-    // for (int i = 1; i < wind.x-1; i++) pl[i][1] = 2000;
-    // for (int i = 1; i < wind.x-1; i++) pl[i][wind.y-2] = 2000;
+    // for (int i = 1; i < wind.y-1; i++) pl[1][i] = 200;
+    // for (int i = 1; i < wind.y-1; i++) pl[wind.x-2][i] = 200;
+    // for (int i = 1; i < wind.x-1; i++) pl[i][1] = 200;
+    // for (int i = 1; i < wind.x-1; i++) pl[i][wind.y-2] = 200;
     
     STAT_ALLOC(pl, T, double, wind.x);
 
     double Tmin = 0, Tmax = 20;
 
     double t = 0;
-    double h = 0.1f;
+    const double dt = 0.1f;
+    const double dx = 0.1f; // [0.049 - XXX] low value like 0.049 represents an EXTREMELY tight grid
     // int enter = 0;
     while (!WindowShouldClose()) {
 	// if (!IsKeyDown(KEY_ENTER) && enter == 0 && t > 0) {BeginDrawing(); EndDrawing(); continue;}
@@ -88,7 +89,7 @@ int main()
 	    if (MousePos.x < 3) MousePos.x = 3;
 	    if (MousePos.y > wind.y-3) MousePos.y = wind.y-3;
 	    if (MousePos.y < 3) MousePos.y = 3;
-	    T[MousePos.x][MousePos.y] = 20.f;
+	    T[MousePos.x][MousePos.y] = 1000.f;
 	}
 
 	BeginDrawing();
@@ -100,27 +101,28 @@ int main()
 		double heat_equ(double t, double p, double v)
 		{
 		    UNUSED(t);
-		    UNUSED(v);
-		    return heat_equ_raw(x, y, h, T, p);
+		    UNUSED(p);
+		    return heat_equ_raw(x, y, dx, T, v);
 		}
 
 		double tmp = 0;
-		if (SymplecticEuler(h, t, &T[x][y], &tmp, heat_equ) < 0)
+		// if (RK4(dt, t, &tmp, &T[x][y], heat_equ) < 0)
+		if (ExplicitEuler(dt, t, &tmp, &T[x][y], heat_equ) < 0)
 		    fprintf(stderr, "WARNING: Error calculation\n");
 
 		double T_norm = norm(T[x][y], Tmin, Tmax);
-
-		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, BLACKPURPLE(T_norm));
+		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, BLUERED(T_norm));
 	    }
 	}
+	printf("%lf\n", norm(T[wind.x/2][wind.y/2], Tmin, Tmax));
 
 	DrawFPS(10, 10);
 	EndDrawing();
-	t += h;
-	// for (int i = 1; i < wind.y-1; i++) pl[1][i] = 2000;
-	// for (int i = 1; i < wind.y-1; i++) pl[wind.x-2][i] = 2000;
-	// for (int i = 1; i < wind.x-1; i++) pl[i][1] = 2000;
-	// for (int i = 1; i < wind.x-1; i++) pl[i][wind.y-2] = 2000;
+	t += dt;
+	for (int i = 1; i < wind.y-1; i++) pl[1][i] = 2000;
+	for (int i = 1; i < wind.y-1; i++) pl[wind.x-2][i] = 2000;
+	for (int i = 1; i < wind.x-1; i++) pl[i][1] = 2000;
+	for (int i = 1; i < wind.x-1; i++) pl[i][wind.y-2] = 2000;
 
     }
     

@@ -55,12 +55,12 @@ int main()
 	}
     }
 
-    // for (int i = 1; i < wind.y-1; i++) pl[i][1] = 20;
-    // for (int i = 1; i < wind.y-1; i++) pl[i][wind.x-2] = 20;
-    // for (int i = 1; i < wind.x-1; i++) pl[1][i] = 20;
-    // for (int i = 1; i < wind.x-1; i++) pl[wind.y-2][i] = 20;
+    // for (int i = 1; i < wind.y-1; i++) pl[i][1] = 5000;
+    // for (int i = 1; i < wind.y-1; i++) pl[i][wind.x-2] = 5000;
+    // for (int i = 1; i < wind.x-1; i++) pl[1][i] = 5000;
+    // for (int i = 1; i < wind.x-1; i++) pl[wind.y-2][i] = 5000;
     
-    pl[wind.y/2][wind.x/2] = 200;
+    pl[wind.y/2][wind.x/2] = 5000;
     
     GRAPHLIB_MALLOC2D(char, console, HEIGHT, WIDTH);
     
