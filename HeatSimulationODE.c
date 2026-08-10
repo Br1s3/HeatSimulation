@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <raylib.h>
 #include <math.h>
+#include <string.h>
 
 #define ODESOLVERLIB_IMPLEMENTATION
 #include "ODEsolverlib.h"
@@ -14,7 +15,6 @@
 #define HEIGHT (9*100)
 
 #define alpha 0.01f
-#define UNUSED(x) (void)x
 
 #define BLACKPURPLE(x) (Color){(x)*0xff, 0x00, (x)*0xff, 0xff}
 #define BLUERED(x) (Color){0xff - (1-x)*0xff/2, 0x00, 0xff - (x)*0xff/2, 0xff}
@@ -35,19 +35,32 @@ double norm(double x, double xmin, double xmax)
     return (x - xmin)/(xmax - xmin);
 }
 
-int heat_equ_raw(int i, int j, double h, double **T, double p)
+void map_init(double **map, int x, int y)
 {
-    // TODO: Find the right Diff2Cent3p2D for the differentes edge t_i-2,j-2 with i=0 and j=2 => t_-2,0
-    // return alpha * Diff2Cent3p2D(h, T[i+1][j], T[i][j+1], p, T[i][j-1], T[i-1][j]);
-    return alpha * Diff2Cent5p2D(h, T[i+2][j], T[i+1][j], T[i][j+2], T[i][j+1], p, T[i][j-1], T[i][j-2], T[i-1][j], T[i-2][j]);
-    // The most part of the error appear because of the exemple:
-    // [ a x x ] (a is the first pixel and b the last)
-    // [ x x x ]
-    // [ x x b ]
-    // b(t=i) is calculated with a(t=i+1) and not a(t=i)
-    // The real problem here, to solve this problem, is that we need two buffers that require a lot of memory.
+    for (int i = 0; i < x; i++) {
+	for (int j = 0; j < y; j++) {
+	    map[i][j] = 0;
+	}
+    }
+    // for (int i = 1; i < y-1; i++) map[i][1] = 200;
+    // for (int i = 1; i < y-1; i++) map[i][x-2] = 200;
+    // for (int i = 1; i < x-1; i++) map[1][i] = 200;
+    // for (int i = 1; i < x-1; i++) map[y-2][i] = 200;
+    // map[y/2][x/2] = 5000;
 }
 
+void AddHeatwithMouse(int IsClicking, Window wind, double **map)
+{
+    if (IsClicking == 1) {
+	Vector2 MousePosf = GetMousePosition();
+	Vec2 MousePos = {(int)MousePosf.x/wind.grid, (int)MousePosf.y/wind.grid};
+	if (MousePos.x > wind.x-3) MousePos.x = wind.x-3;
+	if (MousePos.x < 3) MousePos.x = 3;
+	if (MousePos.y > wind.y-3) MousePos.y = wind.y-3;
+	if (MousePos.y < 3) MousePos.y = 3;
+	map[MousePos.y][MousePos.x] = 2000.f;
+    }
+}
 
 int main()
 {
@@ -57,74 +70,134 @@ int main()
     Window wind;
     SetMeshGrid(&wind, WIDTH, HEIGHT, MESHGRID);
 
-    double pl[wind.x][wind.y];
-    for (int i = 0; i < wind.x; i++) {
-	for (int j = 0; j < wind.y; j++) {
-	    pl[i][j] = 0;
-	}
-    }
-
-    // for (int i = 1; i < wind.y-1; i++) pl[1][i] = 200;
-    // for (int i = 1; i < wind.y-1; i++) pl[wind.x-2][i] = 200;
-    // for (int i = 1; i < wind.x-1; i++) pl[i][1] = 200;
-    // for (int i = 1; i < wind.x-1; i++) pl[i][wind.y-2] = 200;
-    
-    STAT_ALLOC(pl, T, double, wind.x);
+    double pl[wind.y][wind.x];
+    STAT_ALLOC(pl, T, double, wind.y);
+    map_init(T, wind.y, wind.x);
+    double pln[wind.y][wind.x];
+    STAT_ALLOC(pln, Tn, double, wind.y);
+    map_init(Tn, wind.y, wind.x);
 
     double Tmin = 0, Tmax = 20;
-
     double t = 0;
     const double dt = 0.1f;
+    
     const double dx = 0.1f; // [0.049 - XXX] low value like 0.049 represents an EXTREMELY tight grid
-    // int enter = 0;
+    const double dy = 0.1f; // [0.049 - YYY] low value like 0.049 represents an EXTREMELY tight grid
     while (!WindowShouldClose()) {
-	// if (!IsKeyDown(KEY_ENTER) && enter == 0 && t > 0) {BeginDrawing(); EndDrawing(); continue;}
-	// else if (t > 0) enter = 1;
 	if (IsKeyDown(KEY_SPACE)) {BeginDrawing(); EndDrawing(); continue;}
 
-	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) == 1) {
-	    Vector2 MousePosf = GetMousePosition();
-	    Vec2 MousePos = {(int)MousePosf.x/wind.grid, (int)MousePosf.y/wind.grid};
-	    if (MousePos.x > wind.x-3) MousePos.x = wind.x-3;
-	    if (MousePos.x < 3) MousePos.x = 3;
-	    if (MousePos.y > wind.y-3) MousePos.y = wind.y-3;
-	    if (MousePos.y < 3) MousePos.y = 3;
-	    T[MousePos.x][MousePos.y] = 1000.f;
-	}
+	AddHeatwithMouse(IsMouseButtonDown(MOUSE_BUTTON_LEFT), wind, T);
 
 	BeginDrawing();
 	ClearBackground(BLACK);
 
-	for (int x = 2; x < wind.x-2; x++) {
-	    for (int y = 2; y < wind.y-2; y++) {
-
-		double heat_equ(double t, double p, double v)
-		{
-		    UNUSED(t);
-		    UNUSED(p);
-		    return heat_equ_raw(x, y, dx, T, v);
-		}
-
-		double tmp = 0;
-		// if (RK4(dt, t, &tmp, &T[x][y], heat_equ) < 0)
-		if (ExplicitEuler(dt, t, &tmp, &T[x][y], heat_equ) < 0)
-		    fprintf(stderr, "WARNING: Error calculation\n");
-
-		double T_norm = norm(T[x][y], Tmin, Tmax);
+	for (int y = 0; y < wind.y-0; y++) {
+	    for (int x = 0; x < wind.x-0; x++) {
+		double T_norm = norm(T[y][x], Tmin, Tmax);
 		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, BLUERED(T_norm));
+
+// #define DERICH
+#define PERIODIC
+#ifdef DERICH
+		// Boundary condition: Derichlet -> T(t, 0, y) = T(t, x, 0) = 0
+		// if (y < 1 || x < 1 || x > wind.x-2 || y > wind.y-2) continue;
+		// Tn[y][x] = T[y][x] + dt * alpha * Diff2Cent3p2D(dx, T[y+1][x], T[y][x+1], T[y][x], T[y][x-1], T[y-1][x]);
+		if (y < 2 || x < 2 || x > wind.x-3 || y > wind.y-3) continue;
+		Tn[y][x] = T[y][x] + dt * alpha * Diff2Cent5p2D(dx, dy, T[y+2][x], T[y+1][x], T[y][x+2], T[y][x+1], T[y][x], T[y][x-1], T[y][x-2], T[y-1][x], T[y-2][x]);
+#endif
+#ifdef PERIODIC
+                // Boundary condition: Periodic -> T[HEIGHT][x] <=> T[0][x] and T[y][WIDTH] <=> T[y][0]
+		int xb = x, yb = y;
+		if (yb < 1)             yb = wind.y-2;
+		else if (yb+1 > wind.y-1) yb = 1;
+		if (xb < 1)             xb = wind.x-2;
+		else if (xb+1 > wind.x-1) xb = 1;
+
+		Tn[y][x] = T[y][x] + dt * alpha * Diff2Cent3p2D(dx, dy, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
+		// Tn[y][x] = T[y][x] + dt * alpha * Diff2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
+#endif
 	    }
 	}
-	printf("%lf\n", norm(T[wind.x/2][wind.y/2], Tmin, Tmax));
+	// printf("%.2lf,%lf\n", t, norm(T[wind.y/2][wind.x/2], Tmin, Tmax));
+
+
+	// memcpy(&T[0][0], &Tn[0][0], wind.x*wind.y*sizeof(double));
+	for (int y = 0; y < wind.y-0; y++) {
+	    for (int x = 0; x < wind.x-0; x++) {
+		T[y][x] = Tn[y][x];
+	    }
+	}
+	
 
 	DrawFPS(10, 10);
 	EndDrawing();
 	t += dt;
-	for (int i = 1; i < wind.y-1; i++) pl[1][i] = 2000;
-	for (int i = 1; i < wind.y-1; i++) pl[wind.x-2][i] = 2000;
-	for (int i = 1; i < wind.x-1; i++) pl[i][1] = 2000;
-	for (int i = 1; i < wind.x-1; i++) pl[i][wind.y-2] = 2000;
-
+	for (int i = 1; i < wind.y-1; i++) T[i][1] = 2000;
+	for (int i = 1; i < wind.y-1; i++) T[i][wind.x-2] = 2000;
+	for (int i = 1; i < wind.x-1; i++) T[1][i] = 2000;
+	for (int i = 1; i < wind.x-1; i++) T[wind.y-2][i] = 2000;
     }
     
     return 0;
 }
+
+/*
+* TODO: Find the right Diff2Cent3p2D for the differentes edge t_i-2,j-2 with i=0 and j=2 => t_-2,0
+* Here is are problems:
+* 
+* 1: The Most efficient method -> 1 buffer:
+*     [ a x x ] (a is the first pixel and b the last)
+*     [ x x x ]
+*     [ x x b ]
+* b(t=i) is calculated with a(t=i+1) and not a(t=i)
+* The real problem here, to solve this problem, is that we need two buffers that require a lot of memory.
+*
+* while(1) {
+*     double **T;
+*     for (int i = 0; i < HEIGHT; i++) {
+*         for (int j = 0; j < WIDTH; j++) {
+*             T[i][j] = T[i][j] + dt * heat_equation;
+*         }
+*     }
+* }
+*
+* 2: The Best visual one:
+*     2 buffer + 2 for loop to update 1 buffer
+*
+* while(1) {
+*     double **T;
+*     double **Tn;
+*     for (int i = 0; i < HEIGHT; i++) {
+*         for (int j = 0; j < WIDTH; j++) {
+*             Tn[i][j] = T[i][j] + dt * heat_equation;
+*         }
+*     }
+*     for (int i = 0; i < HEIGHT; i++) {
+*         for (int j = 0; j < WIDTH; j++) {
+*             T[i][j] = Tn[i][j];
+*         }
+*     }
+* }
+* 
+* 3: The Red-Black ordering (chessboard)
+*     1 buffer + 2 for loop to do the odd part
+*
+* while(1) {
+*     double **T;
+*     for (int i = 0; i < HEIGHT; i++) {
+*         for (int j = 0; j < WIDTH; j++) {
+*             if ((i+j)%2 == 0) {
+*                 T[i][j] = T[i][j] + dt * heat_equation;
+*             }
+*         }
+*     }
+*     for (int i = 0; i < HEIGHT; i++) {
+*         for (int j = 0; j < WIDTH; j++) {
+*             if ((i+j)%2 == 1) {
+*                 T = T + dt * heat_equation;
+*             }
+*         }
+*     }
+* }
+*
+*/
