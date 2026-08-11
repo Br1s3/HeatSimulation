@@ -1,15 +1,15 @@
 /* To use it:
  *
- *     #define ODESOLVERLIB_IMPLEMENTATION
- *     #include "ODEsolverlib.h"
+ *     #define DEVER_IMPLEMENTATION
+ *     #include "dever.h"
  *
  *
  * Basic usage with a stiff equation:
  * y' = -15y with y(0) = 1
  * Who has for solution y(t) = exp(-15*t)
  *
- *     #define ODESOLVERLIB_IMPLEMENTATION
- *     #include "ODEsolverlib.h"
+ *     #define DEVER_IMPLEMENTATION
+ *     #include "dever.h"
  *
  *     double equation(double t, double y, double dy)
  *     {
@@ -36,8 +36,8 @@
  *     }
  */
 
-#ifndef ODESOLVERLIB_H_INCLUED
-#define ODESOLVERLIB_H_INCLUED
+#ifndef DEVER_H_INCLUED
+#define DEVER_H_INCLUED
 #include <math.h>   // Used for: isnan(), pow()
 #include <stddef.h> // Used for: NULL
 
@@ -94,37 +94,40 @@ int DOPRI45_2d(double stepSize, double Time, double err, Vec2d *x, Vec2d *v, Vec
 int DOPRI45_3d(double stepSize, double Time, double err, Vec3d *x, Vec3d *v, Vec3d (*f)(double, Vec3d, Vec3d));
 
 
-////////////////////////////////////////////////////////////////////////////////
-// Here are the differences/derivatives apply to the space parameters of the equations
+//////////////////////////////////////////////////////////////////////////////////////
+// Here are the Finit-Difference Method apply to the space parameters of the equations
 
-// {Stencil 3 points} (1 Dimension) continuous difference Centered
-double Diff1Cent3p1DCont(const double dx, double x0, double (*f)(double));
+// Only for specific Continuous function:
+// {Stencil 3 points} (1 Dimension) finite-difference Centered
+double FDM1Cent3p1DCont(const double dx, double x0, double (*f)(double));
+// {Stencil 3 points} (1 Dimension) [Laplace operator Δ] finite-difference Centered
+double FDM2Cent3p1DCont(const double dx, double x0, double (*f)(double));
+// {Stencil 5 points} (1 Dimension) finite-difference Centered
+double FDM1Cent5p1DCont(const double dx, double x0, double (*f)(double));
 
 // {Stencil 3 points} (1 Dimension) finite-difference Centered
-double Diff1Cent3p1D(const double dx, double f_ip1, double f_im1);
+double FDM1Cent3p1D(const double dx, double f_ip1, double f_im1);
 
-// {Stencil 3 points} (1 Dimension) [Laplace operator] continuous difference Centered
-double Diff2Cent3p1DCont(const double dx, double x0, double (*f)(double));
+// {Stencil 3 points} (1 Dimension) [Laplace operator Δ] finite-difference Centered
+double FDM2Cent3p1D(const double dx, double f_ip1, double f_i, double f_im1);
 
-// {Stencil 3 points} (1 Dimension) [Laplace operator] finite-difference Centered
-double Diff2Cent3p1D(const double dx, double f_ip1, double f_i, double f_im1);
-
-// {Stencil 3 points} (2 Dimensions) [Laplace operator] finite-difference Centered
-double Diff2Cent3p2D(const double dx, const double dy, double f_ip1j, double f_ijp1, double f_ij, double f_ijm1, double f_im1j);
+// {Stencil 3 points} (2 Dimensions) [Laplace operator Δ] finite-difference Centered
+double FDM2Cent3p2D(const double dxy, double f_ip1j, double f_ijp1, double f_ij, double f_ijm1, double f_im1j);
+double FDM2Cent3p2Ddxdy(const double dx, const double dy, double f_ip1j, double f_ijp1, double f_ij, double f_ijm1, double f_im1j);
 
 // {Stencil 5 points} (1 Dimension) finite-difference Centered
-double Diff1Cent5p1D(const double dx, double f_ip2, double f_ip1, double f_i, double f_im1, double f_im2);
+double FDM1Cent5p1D(const double dx, double f_ip2, double f_ip1, double f_i, double f_im1, double f_im2);
 
-// {Stencil 5 points} (1 Dimensions) [Laplace operator] finite-difference Centered
-double Diff2Cent5p1D(const double dx, double f_ip2, double f_ip1, double f_i, double f_im1, double f_im2);
+// {Stencil 5 points} (1 Dimensions) [Laplace operator Δ] finite-difference Centered
+double FDM2Cent5p1D(const double dx, double f_ip2, double f_ip1, double f_i, double f_im1, double f_im2);
 
-// {Stencil 5 points} (2 Dimensions) [Laplace operator] finite-difference Centered
-double Diff2Cent5p2D(const double dx, const double dy, double f_ip2j, double f_ip1j, double f_ijp2, double f_ijp1, double f_ij, double f_ijm1, double f_ijm2, double f_im1j, double f_im2j);
+// {Stencil 5 points} (2 Dimensions) [Laplace operator Δ] finite-difference Centered
+double FDM2Cent5p2D(const double dxy, double f_ip2j, double f_ip1j, double f_ijp2, double f_ijp1, double f_ij, double f_ijm1, double f_ijm2, double f_im1j, double f_im2j);
+double FDM2Cent5p2Ddxdy(const double dx, const double dy, double f_ip2j, double f_ip1j, double f_ijp2, double f_ijp1, double f_ij, double f_ijm1, double f_ijm2, double f_im1j, double f_im2j);
+//////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////
 
-
-# ifdef ODESOLVERLIB_IMPLEMENTATION
+# ifdef DEVER_IMPLEMENTATION
 
 
 int ExplicitEuler(const double dt, double t, double *x, double *v, double (*f)(double, double, double))
@@ -640,55 +643,76 @@ int DOPRI45_3d(double stepSize, double Time, double err, Vec3d *p, Vec3d *v, Vec
 ////////////////////////////////////////////////////////////////////////////////
 // Here are the differences/derivatives apply to the space parameters of the equations
 
-double Diff1Cent3p1DCont(const double dx, double x0, double (*f)(double))
+double FDM1Cent3p1DCont(const double dx, double x0, double (*f)(double))
 {
     return (f(x0 + dx) - f(x0 - dx))/(2.f*dx);
 }
 
-double Diff1Cent3p1D(const double dx, double f_ip1, double f_im1)
-{
-    return (f_ip1 - f_im1)/(2.f*dx);
-}
-
-double Diff2Cent3p1DCont(const double dx, double x0, double (*f)(double))
+double FDM2Cent3p1DCont(const double dx, double x0, double (*f)(double))
 {
     return (f(x0 + dx) - f(x0) + f(x0 - dx))/SQ_ODESOLVER(dx);
 }
 
-double Diff2Cent3p1D(const double dx, double f_ip1, double f_i, double f_im1)
+double FDM1Cent5p1DCont(const double dx, double x0, double (*f)(double))
+{
+    return (f(x0 - 2.f*dx) + 8.f*f(x0 + dx) - 8.f*f(x0 - dx) - f(x0 + 2.f*dx))/(12.f*dx);
+}
+
+double FDM1Cent3p1D(const double dx, double f_ip1, double f_im1)
+{
+    return (f_ip1 - f_im1)/(2.f*dx);
+}
+
+double FDM2Cent3p1D(const double dx, double f_ip1, double f_i, double f_im1)
 {
     return (f_ip1 - 2.f*f_i + f_im1)/SQ_ODESOLVER(dx);
 }
 
-double Diff2Cent3p2D(const double dx, const double dy, double f_ip1j, double f_ijp1, double f_ij, double f_ijm1, double f_im1j)
+double FDM2Cent3p2D(const double dxy, double f_ip1j, double f_ijp1, double f_ij, double f_ijm1, double f_im1j)
 {
-    return (f_ip1j - 2.f*f_ij + f_im1j)/SQ_ODESOLVER(dx) + (f_ijp1 - 2.f*f_ij + f_ijm1)/SQ_ODESOLVER(dy);
-    // return (f_ip1j + f_im1j + f_ijp1 + f_ijm1 - 4.f*f_ij)/SQ_ODESOLVER(dx);
+    return (f_ip1j + f_im1j + f_ijp1 + f_ijm1 - 4.f*f_ij)/SQ_ODESOLVER(dxy);
 }
 
-double Diff1Cent5p1D(const double dx, double f_ip2, double f_ip1, double f_i, double f_im1, double f_im2)
+double FDM2Cent3p2Ddxdy(const double dx, const double dy, double f_ip1j, double f_ijp1, double f_ij, double f_ijm1, double f_im1j)
+{
+    // TODO: Optimization
+    return (f_ip1j - 2.f*f_ij + f_im1j)/SQ_ODESOLVER(dx) + (f_ijp1 - 2.f*f_ij + f_ijm1)/SQ_ODESOLVER(dy);
+}
+
+double FDM1Cent5p1D(const double dx, double f_ip2, double f_ip1, double f_i, double f_im1, double f_im2)
 {
     (void)f_i;
     return (8.f*f_ip1 - f_ip2 - 8.f*f_im1 + f_im2)/(12.f*dx);
 }
 
-double Diff2Cent5p1D(const double dx, double f_ip2, double f_ip1, double f_i, double f_im1, double f_im2)
+double FDM2Cent5p1D(const double dx, double f_ip2, double f_ip1, double f_i, double f_im1, double f_im2)
 {
+    // TODO: Optimization
     return (-f_im2 + 16.f*f_ip1 - 30.f*f_i + 16.f*f_im1 - f_ip2)/(12.f*(SQ_ODESOLVER(dx)));
 }
 
-double Diff2Cent5p2D(const double dx, const double dy, double f_ip2j, double f_ip1j, double f_ijp2, double f_ijp1, double f_ij, double f_ijm1, double f_ijm2, double f_im1j, double f_im2j)
+double FDM2Cent5p2D(const double dxy, double f_ip2j, double f_ip1j, double f_ijp2, double f_ijp1, double f_ij, double f_ijm1, double f_ijm2, double f_im1j, double f_im2j)
 {
-    return (-f_im2j + 16.f*f_ip1j - 30.f*f_ij + 16.f*f_im1j - f_ip2j)/(12.f*SQ_ODESOLVER(dx)) + (-f_ijm2 + 16.f*f_ijp1 - 30.f*f_ij + 16.f*f_ijm1 - f_ijp2)/(12.f*SQ_ODESOLVER(dy));
+    return (16.f*(f_im1j + f_ip1j + f_ijm1 + f_ijp1) - (f_im2j + f_ip2j + f_ijm2 + f_ijp2) - 60.f*f_ij) / (12.f*SQ_ODESOLVER(dxy)); // 13 op
+    // TODO: Optimization
+    // static double div = 12.f*SQ_ODESOLVER(dxy);
+    // return (16.f*(f_im1j + f_ip1j + f_ijm1 + f_ijp1) - (f_im2j + f_ip2j + f_ijm2 + f_ijp2) - 60.f*f_ij) / (12.f*SQ_ODESOLVER(dxy));
 }
+
+double FDM2Cent5p2Ddxdy(const double dx, const double dy, double f_ip2j, double f_ip1j, double f_ijp2, double f_ijp1, double f_ij, double f_ijm1, double f_ijm2, double f_im1j, double f_im2j)
+{
+    return (-f_im2j + 16.f*f_ip1j - 30.f*f_ij + 16.f*f_im1j - f_ip2j)/(12.f*SQ_ODESOLVER(dx)) + (-f_ijm2 + 16.f*f_ijp1 - 30.f*f_ij + 16.f*f_ijm1 - f_ijp2)/(12.f*SQ_ODESOLVER(dy)); // 22 op
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 
-# endif // ODESOLVERLIB_IMPLEMENTATION
-#endif // ODESOLVERLIB_H_INCLUED
+# endif // DEVER_IMPLEMENTATION
+#endif // DEVER_H_INCLUED
 
 /***********************************
 TODO:
+- FDM need optimization
 - Suppress time the parameter in ExplicitEuler, SymplecticEuler, RK4, RK, Verlet.
 - Redo this part to be coherent with the RK4 line 140
 - Find an other way than using pow() in the DOPRI45

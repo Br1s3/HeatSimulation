@@ -3,13 +3,13 @@
 #include <math.h>
 #include <string.h>
 
-#define ODESOLVERLIB_IMPLEMENTATION
-#include "ODEsolverlib.h"
+#define DEVER_IMPLEMENTATION
+#include "dever.h"
 
 #define MESHGRIDLIB_IMPLEMENTATION
 #include "meshgridlib.h"
 
-#define FPS 60
+#define FPS 600
 #define MESHGRID 200
 #define WIDTH (16*100)
 #define HEIGHT (9*100)
@@ -96,14 +96,14 @@ int main()
 		double T_norm = norm(T[y][x], Tmin, Tmax);
 		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, BLUERED(T_norm));
 
-// #define DERICH
-#define PERIODIC
+#define DERICH
+// #define PERIODIC
 #ifdef DERICH
 		// Boundary condition: Derichlet -> T(t, 0, y) = T(t, x, 0) = 0
 		// if (y < 1 || x < 1 || x > wind.x-2 || y > wind.y-2) continue;
 		// Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dx, T[y+1][x], T[y][x+1], T[y][x], T[y][x-1], T[y-1][x]);
 		if (y < 2 || x < 2 || x > wind.x-3 || y > wind.y-3) continue;
-		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent5p2D(dx, dy, T[y+2][x], T[y+1][x], T[y][x+2], T[y][x+1], T[y][x], T[y][x-1], T[y][x-2], T[y-1][x], T[y-2][x]);
+		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent5p2D(dx, T[y+2][x], T[y+1][x], T[y][x+2], T[y][x+1], T[y][x], T[y][x-1], T[y][x-2], T[y-1][x], T[y-2][x]);
 #endif
 #ifdef PERIODIC
                 // Boundary condition: Periodic -> T[HEIGHT][x] <=> T[0][x] and T[y][WIDTH] <=> T[y][0]
@@ -113,8 +113,8 @@ int main()
 		if (xb < 1)             xb = wind.x-2;
 		else if (xb+1 > wind.x-1) xb = 1;
 
-		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
-		// Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
+		// Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
+		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
 #endif
 	    }
 	}

@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define ODESOLVERLIB_IMPLEMENTATION
-#include "ODEsolverlib.h"
+#define DEVER_IMPLEMENTATION
+#include "dever.h"
 
 #define MESHGRIDLIB_IMPLEMENTATION
 #include "meshgridlib.h"

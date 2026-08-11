@@ -1,4 +1,5 @@
-main
+main*
+main2*
 HeatSimulation
-HeatSimulationODE
-HeatSimulationODECons
+HeatSimulationPDE
+HeatSimulationPDECons
