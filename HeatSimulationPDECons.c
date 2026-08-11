@@ -67,7 +67,7 @@ int main()
     double t = 0;
     const double dt = 0.1f;
     const double dx = 0.1f;
-    const double dy = 0.1f;
+    // const double dy = 0.1f;
     for (int i = 0; i < NB_FRAME; i++) {
 	ConsoleClear(console, WIDTH, HEIGHT, ' ');
 
@@ -78,7 +78,7 @@ int main()
 
 		PrintRectangle(console, WIDTH, HEIGHT, MESHOFFSET_X(wind, x), MESHOFFSET_X(wind, y), wind.grid, wind.grid, palette[Light]);
 
-		Tn[y][x] = T[y][x] + dt * alpha * Diff2Cent3p2D(dx, dy, T[y+1][x], T[y][x+1], T[y][x], T[y][x-1], T[y-1][x]);
+		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dx, T[y+1][x], T[y][x+1], T[y][x], T[y][x-1], T[y-1][x]);
 
 	    }
 	}
@@ -105,7 +105,7 @@ int main()
 }
 
 /*
-* TODO: Find the right Diff2Cent3p2D for the differentes edge t_i-2,j-2 with i=0 and j=2 => t_-2,0
+* TODO: Find the right FDM2Cent3p2D for the differentes edge t_i-2,j-2 with i=0 and j=2 => t_-2,0
 * Here is are problems:
 * 
 * 1: The Most efficient method -> 1 buffer:

@@ -58,7 +58,7 @@ void AddHeatwithMouse(int IsClicking, Window wind, double **map)
 	if (MousePos.x < 3) MousePos.x = 3;
 	if (MousePos.y > wind.y-3) MousePos.y = wind.y-3;
 	if (MousePos.y < 3) MousePos.y = 3;
-	map[MousePos.y][MousePos.x] = 2000.f;
+	map[MousePos.y][MousePos.x] = 100.f;
     }
 }
 
@@ -82,7 +82,7 @@ int main()
     const double dt = 0.1f;
     
     const double dx = 0.1f; // [0.049 - XXX] low value like 0.049 represents an EXTREMELY tight grid
-    const double dy = 0.1f; // [0.049 - YYY] low value like 0.049 represents an EXTREMELY tight grid
+    // const double dy = 0.1f; // [0.049 - YYY] low value like 0.049 represents an EXTREMELY tight grid
     while (!WindowShouldClose()) {
 	if (IsKeyDown(KEY_SPACE)) {BeginDrawing(); EndDrawing(); continue;}
 
@@ -101,9 +101,9 @@ int main()
 #ifdef DERICH
 		// Boundary condition: Derichlet -> T(t, 0, y) = T(t, x, 0) = 0
 		// if (y < 1 || x < 1 || x > wind.x-2 || y > wind.y-2) continue;
-		// Tn[y][x] = T[y][x] + dt * alpha * Diff2Cent3p2D(dx, T[y+1][x], T[y][x+1], T[y][x], T[y][x-1], T[y-1][x]);
+		// Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dx, T[y+1][x], T[y][x+1], T[y][x], T[y][x-1], T[y-1][x]);
 		if (y < 2 || x < 2 || x > wind.x-3 || y > wind.y-3) continue;
-		Tn[y][x] = T[y][x] + dt * alpha * Diff2Cent5p2D(dx, dy, T[y+2][x], T[y+1][x], T[y][x+2], T[y][x+1], T[y][x], T[y][x-1], T[y][x-2], T[y-1][x], T[y-2][x]);
+		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent5p2D(dx, dy, T[y+2][x], T[y+1][x], T[y][x+2], T[y][x+1], T[y][x], T[y][x-1], T[y][x-2], T[y-1][x], T[y-2][x]);
 #endif
 #ifdef PERIODIC
                 // Boundary condition: Periodic -> T[HEIGHT][x] <=> T[0][x] and T[y][WIDTH] <=> T[y][0]
@@ -113,8 +113,8 @@ int main()
 		if (xb < 1)             xb = wind.x-2;
 		else if (xb+1 > wind.x-1) xb = 1;
 
-		Tn[y][x] = T[y][x] + dt * alpha * Diff2Cent3p2D(dx, dy, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
-		// Tn[y][x] = T[y][x] + dt * alpha * Diff2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
+		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
+		// Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
 #endif
 	    }
 	}
@@ -132,17 +132,17 @@ int main()
 	DrawFPS(10, 10);
 	EndDrawing();
 	t += dt;
-	for (int i = 1; i < wind.y-1; i++) T[i][1] = 2000;
-	for (int i = 1; i < wind.y-1; i++) T[i][wind.x-2] = 2000;
-	for (int i = 1; i < wind.x-1; i++) T[1][i] = 2000;
-	for (int i = 1; i < wind.x-1; i++) T[wind.y-2][i] = 2000;
+	// for (int i = 1; i < wind.y-1; i++) T[i][1] = 2000;
+	// for (int i = 1; i < wind.y-1; i++) T[i][wind.x-2] = 2000;
+	// for (int i = 1; i < wind.x-1; i++) T[1][i] = 2000;
+	// for (int i = 1; i < wind.x-1; i++) T[wind.y-2][i] = 2000;
     }
     
     return 0;
 }
 
 /*
-* TODO: Find the right Diff2Cent3p2D for the differentes edge t_i-2,j-2 with i=0 and j=2 => t_-2,0
+* TODO: Find the right FDM2Cent3p2D for the differentes edge t_i-2,j-2 with i=0 and j=2 => t_-2,0
 * Here is are problems:
 * 
 * 1: The Most efficient method -> 1 buffer:
