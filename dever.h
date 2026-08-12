@@ -41,10 +41,10 @@
 #include <math.h>   // Used for: isnan(), pow()
 #include <stddef.h> // Used for: NULL
 
-#define ABS_ODESOLVER(x) (((x) < 0) ? -(x) : (x))
-#define SQ_ODESOLVER(x) ((x)*(x))
+#define ABS_DEVER(x) (((x) < 0) ? -(x) : (x))
+#define SQ_DEVER(x) ((x)*(x))
 // TODO: Use a VA_ARGS to have UNUSED(x, ...) (void)x; (void)...
-#define UNUSED_ODESOLVER(x) (void)x
+#define UNUSED_DEVER(x) (void)x
 
 typedef struct
 {
@@ -609,13 +609,13 @@ int DOPRI45(double stepSize, double Time, double err, double *x, double *v, doub
     	for (int i = 0; i < q; i++) {
     	    TE += (B5[i] - B4[i])*P[i].xn;
     	}
-    	TE = ABS_ODESOLVER(TE);
+    	TE = ABS_DEVER(TE);
 
 	const double ErreurFinale = TE;
 	if (isnan(ErreurFinale)) return -1;
-	const double difErreur = ABS_ODESOLVER(ErreurDebut - ErreurFinale);
+	const double difErreur = ABS_DEVER(ErreurDebut - ErreurFinale);
 	if (!firstTime)
-	    valeur = ABS_ODESOLVER(difErreur - DernierDifErreur);
+	    valeur = ABS_DEVER(difErreur - DernierDifErreur);
 	DernierDifErreur = difErreur;
 	firstTime = 0;
     } while(valeur > err);
@@ -650,7 +650,7 @@ double FDM1Cent3p1DCont(const double dx, double x0, double (*f)(double))
 
 double FDM2Cent3p1DCont(const double dx, double x0, double (*f)(double))
 {
-    return (f(x0 + dx) - f(x0) + f(x0 - dx))/SQ_ODESOLVER(dx);
+    return (f(x0 + dx) - f(x0) + f(x0 - dx))/SQ_DEVER(dx);
 }
 
 double FDM1Cent5p1DCont(const double dx, double x0, double (*f)(double))
@@ -665,18 +665,18 @@ double FDM1Cent3p1D(const double dx, double f_ip1, double f_im1)
 
 double FDM2Cent3p1D(const double dx, double f_ip1, double f_i, double f_im1)
 {
-    return (f_ip1 - 2.f*f_i + f_im1)/SQ_ODESOLVER(dx);
+    return (f_ip1 - 2.f*f_i + f_im1)/SQ_DEVER(dx);
 }
 
 double FDM2Cent3p2D(const double dxy, double f_ip1j, double f_ijp1, double f_ij, double f_ijm1, double f_im1j)
 {
-    return (f_ip1j + f_im1j + f_ijp1 + f_ijm1 - 4.f*f_ij)/SQ_ODESOLVER(dxy);
+    return (f_ip1j + f_im1j + f_ijp1 + f_ijm1 - 4.f*f_ij)/SQ_DEVER(dxy);
 }
 
 double FDM2Cent3p2Ddxdy(const double dx, const double dy, double f_ip1j, double f_ijp1, double f_ij, double f_ijm1, double f_im1j)
 {
     // TODO: Optimization
-    return (f_ip1j - 2.f*f_ij + f_im1j)/SQ_ODESOLVER(dx) + (f_ijp1 - 2.f*f_ij + f_ijm1)/SQ_ODESOLVER(dy);
+    return (f_ip1j - 2.f*f_ij + f_im1j)/SQ_DEVER(dx) + (f_ijp1 - 2.f*f_ij + f_ijm1)/SQ_DEVER(dy);
 }
 
 double FDM1Cent5p1D(const double dx, double f_ip2, double f_ip1, double f_i, double f_im1, double f_im2)
@@ -688,20 +688,20 @@ double FDM1Cent5p1D(const double dx, double f_ip2, double f_ip1, double f_i, dou
 double FDM2Cent5p1D(const double dx, double f_ip2, double f_ip1, double f_i, double f_im1, double f_im2)
 {
     // TODO: Optimization
-    return (-f_im2 + 16.f*f_ip1 - 30.f*f_i + 16.f*f_im1 - f_ip2)/(12.f*(SQ_ODESOLVER(dx)));
+    return (-f_im2 + 16.f*f_ip1 - 30.f*f_i + 16.f*f_im1 - f_ip2)/(12.f*(SQ_DEVER(dx)));
 }
 
 double FDM2Cent5p2D(const double dxy, double f_ip2j, double f_ip1j, double f_ijp2, double f_ijp1, double f_ij, double f_ijm1, double f_ijm2, double f_im1j, double f_im2j)
 {
-    return (16.f*(f_im1j + f_ip1j + f_ijm1 + f_ijp1) - (f_im2j + f_ip2j + f_ijm2 + f_ijp2) - 60.f*f_ij) / (12.f*SQ_ODESOLVER(dxy)); // 13 op
+    return (16.f*(f_im1j + f_ip1j + f_ijm1 + f_ijp1) - (f_im2j + f_ip2j + f_ijm2 + f_ijp2) - 60.f*f_ij) / (12.f*SQ_DEVER(dxy)); // 13 op
     // TODO: Optimization
-    // static double div = 12.f*SQ_ODESOLVER(dxy);
-    // return (16.f*(f_im1j + f_ip1j + f_ijm1 + f_ijp1) - (f_im2j + f_ip2j + f_ijm2 + f_ijp2) - 60.f*f_ij) / (12.f*SQ_ODESOLVER(dxy));
+    // static double div = 12.f*SQ_DEVER(dxy);
+    // return (16.f*(f_im1j + f_ip1j + f_ijm1 + f_ijp1) - (f_im2j + f_ip2j + f_ijm2 + f_ijp2) - 60.f*f_ij) / (12.f*SQ_DEVER(dxy));
 }
 
 double FDM2Cent5p2Ddxdy(const double dx, const double dy, double f_ip2j, double f_ip1j, double f_ijp2, double f_ijp1, double f_ij, double f_ijm1, double f_ijm2, double f_im1j, double f_im2j)
 {
-    return (-f_im2j + 16.f*f_ip1j - 30.f*f_ij + 16.f*f_im1j - f_ip2j)/(12.f*SQ_ODESOLVER(dx)) + (-f_ijm2 + 16.f*f_ijp1 - 30.f*f_ij + 16.f*f_ijm1 - f_ijp2)/(12.f*SQ_ODESOLVER(dy)); // 22 op
+    return (-f_im2j + 16.f*f_ip1j - 30.f*f_ij + 16.f*f_im1j - f_ip2j)/(12.f*SQ_DEVER(dx)) + (-f_ijm2 + 16.f*f_ijp1 - 30.f*f_ij + 16.f*f_ijm1 - f_ijp2)/(12.f*SQ_DEVER(dy)); // 22 op
 }
 
 ////////////////////////////////////////////////////////////////////////////////

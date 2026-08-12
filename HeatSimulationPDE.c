@@ -9,7 +9,7 @@
 #define MESHGRIDLIB_IMPLEMENTATION
 #include "meshgridlib.h"
 
-#define FPS 600
+#define FPS 100
 #define MESHGRID 200
 #define WIDTH (16*100)
 #define HEIGHT (9*100)
@@ -54,13 +54,15 @@ void AddHeatwithMouse(int IsClicking, Window wind, double **map)
     if (IsClicking == 1) {
 	Vector2 MousePosf = GetMousePosition();
 	Vec2 MousePos = {(int)MousePosf.x/wind.grid, (int)MousePosf.y/wind.grid};
-	if (MousePos.x > wind.x-3) MousePos.x = wind.x-3;
-	if (MousePos.x < 3) MousePos.x = 3;
-	if (MousePos.y > wind.y-3) MousePos.y = wind.y-3;
-	if (MousePos.y < 3) MousePos.y = 3;
+	if (MousePos.x > wind.x-2) MousePos.x = wind.x-2;
+	if (MousePos.x < 2) MousePos.x = 2;
+	if (MousePos.y > wind.y-2) MousePos.y = wind.y-2;
+	if (MousePos.y < 2) MousePos.y = 2;
 	map[MousePos.y][MousePos.x] = 100.f;
     }
 }
+
+// double HeatEquation(double t, double p, double v);
 
 int main()
 {
@@ -79,10 +81,18 @@ int main()
 
     double Tmin = 0, Tmax = 20;
     double t = 0;
+
+/* Stability condition:
+ * dt <= dx²/(4α)
+ * if dx=0.1 & α=0.01 then dt<=0.25
+ */
+
     const double dt = 0.1f;
-    
-    const double dx = 0.1f; // [0.049 - XXX] low value like 0.049 represents an EXTREMELY tight grid
-    // const double dy = 0.1f; // [0.049 - YYY] low value like 0.049 represents an EXTREMELY tight grid
+    const double dx = 0.1f;
+
+#define DERICH
+// #define PERIODIC
+
     while (!WindowShouldClose()) {
 	if (IsKeyDown(KEY_SPACE)) {BeginDrawing(); EndDrawing(); continue;}
 
@@ -90,36 +100,40 @@ int main()
 
 	BeginDrawing();
 	ClearBackground(BLACK);
-
 	for (int y = 0; y < wind.y-0; y++) {
 	    for (int x = 0; x < wind.x-0; x++) {
 		double T_norm = norm(T[y][x], Tmin, Tmax);
 		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, BLUERED(T_norm));
 
-#define DERICH
-// #define PERIODIC
 #ifdef DERICH
 		// Boundary condition: Derichlet -> T(t, 0, y) = T(t, x, 0) = 0
-		// if (y < 1 || x < 1 || x > wind.x-2 || y > wind.y-2) continue;
-		// Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dx, T[y+1][x], T[y][x+1], T[y][x], T[y][x-1], T[y-1][x]);
-		if (y < 2 || x < 2 || x > wind.x-3 || y > wind.y-3) continue;
-		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent5p2D(dx, T[y+2][x], T[y+1][x], T[y][x+2], T[y][x+1], T[y][x], T[y][x-1], T[y][x-2], T[y-1][x], T[y-2][x]);
+		int xb = x, yb = y;
+		if (yb < 1 || xb < 1 || xb > wind.x-2 || yb > wind.y-2) continue;
 #endif
 #ifdef PERIODIC
                 // Boundary condition: Periodic -> T[HEIGHT][x] <=> T[0][x] and T[y][WIDTH] <=> T[y][0]
 		int xb = x, yb = y;
-		if (yb < 1)             yb = wind.y-2;
+		if (yb-1 < 0)             yb = wind.y-2;
 		else if (yb+1 > wind.y-1) yb = 1;
-		if (xb < 1)             xb = wind.x-2;
+		if (xb-1 < 0)             xb = wind.x-2;
 		else if (xb+1 > wind.x-1) xb = 1;
-
-		// Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
-		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
 #endif
+
+		double HeatEquation(double t, double p, double v)
+		{
+		    (void)t; (void)p; (void)v;
+		    return alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
+		    // return alpha * FDM2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
+		}
+		double Tnext = T[yb][xb];
+		double tmp;
+		ExplicitEuler(dt, t, &tmp, &Tnext, HeatEquation);
+		Tn[y][x] = Tnext;
+		// Tn[y][x] = T[yb][xb] + dt * alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
+		// Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
 	    }
 	}
 	// printf("%.2lf,%lf\n", t, norm(T[wind.y/2][wind.x/2], Tmin, Tmax));
-
 
 	// memcpy(&T[0][0], &Tn[0][0], wind.x*wind.y*sizeof(double));
 	for (int y = 0; y < wind.y-0; y++) {
