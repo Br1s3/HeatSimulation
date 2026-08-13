@@ -171,7 +171,7 @@ int main()
  * - Add the Robin bounderies conditions ...
  * - Find the right FDM2Cent3p2D for the differentes edge t_i-2,j-2 with i=0 and j=2 => t_-2,0
  * Here is are problems:
- * 
+ *
  * 1: The Most efficient method -> 1 buffer:
  *     [ a x x ] (a is the first pixel and b the last)
  *     [ x x x ]
