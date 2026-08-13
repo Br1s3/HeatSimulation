@@ -46,7 +46,7 @@ void map_init(double **map, int x, int y)
     // for (int i = 1; i < y-1; i++) map[x-2][i] = 2000;
     // for (int i = 1; i < x-1; i++) map[i][1] = 2000;
     // for (int i = 1; i < x-1; i++) map[i][y-2] = 2000;
-    map[x/2][y/2] = 5000;
+    // map[x/2][y/2] = 5000;
 }
 
 void AddHeatwithMouse(int IsClicking, Window wind, double **map)
@@ -92,7 +92,8 @@ int main()
 
 #define DERICH
 // #define PERIODIC
-
+    char tab[30] = {' '};
+    snprintf(tab, 30, "ERROR: Calculation overflow");
     while (!WindowShouldClose()) {
 	if (IsKeyDown(KEY_SPACE)) {BeginDrawing(); EndDrawing(); continue;}
 	AddHeatwithMouse(IsMouseButtonDown(MOUSE_BUTTON_LEFT), wind, T);
@@ -107,7 +108,8 @@ int main()
 #ifdef DERICH
 		// Boundary condition: Derichlet -> T(t, 0, y) = T(t, x, 0) = 0
 		int xb = x, yb = y;
-		if (yb < 1 || xb < 1 || xb > wind.x-2 || yb > wind.y-2) continue;
+		// if (yb < 1 || xb < 1 || xb > wind.x-2 || yb > wind.y-2) continue;
+		if (yb < 2 || xb < 2 || xb > wind.x-3 || yb > wind.y-3) continue;
 #endif
 #ifdef PERIODIC
                 // Boundary condition: Periodic -> T[HEIGHT][x] <=> T[0][x] and T[y][WIDTH] <=> T[y][0]
@@ -121,12 +123,13 @@ int main()
 		double HeatEquation(double t, double p, double v)
 		{
 		    (void)t; (void)p; (void)v;
-		    return alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
-		    // return alpha * FDM2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
+		    // return alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
+		    return alpha * FDM2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
 		}
 		double Tnext = T[yb][xb];
 		double tmp;
-		ExplicitEuler(dt, t, &tmp, &Tnext, HeatEquation);
+		if (ExplicitEuler(dt, t, &tmp, &Tnext, HeatEquation) < 0)
+		    DrawText(tab, WIDTH/2-200, 10, 50, RED);
 		Tn[y][x] = Tnext;
 		// Tn[y][x] = T[yb][xb] + dt * alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
 		// Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
@@ -141,10 +144,11 @@ int main()
 	    }
 	}
 	
-
+	snprintf(tab, 15, "t = %.2lf", t);
+	t += dt;
+	DrawText(tab, 20, 40, 20, GREEN);
 	DrawFPS(10, 10);
 	EndDrawing();
-	t += dt;
 	// for (int i = 1; i < wind.y-1; i++) T[i][1] = 2000;
 	// for (int i = 1; i < wind.y-1; i++) T[i][wind.x-2] = 2000;
 	// for (int i = 1; i < wind.x-1; i++) T[1][i] = 2000;
