@@ -42,11 +42,11 @@ void map_init(double **map, int x, int y)
 	    map[i][j] = 0;
 	}
     }
-    // for (int i = 1; i < y-1; i++) map[i][1] = 200;
-    // for (int i = 1; i < y-1; i++) map[i][x-2] = 200;
-    // for (int i = 1; i < x-1; i++) map[1][i] = 200;
-    // for (int i = 1; i < x-1; i++) map[y-2][i] = 200;
-    // map[y/2][x/2] = 5000;
+    // for (int i = 1; i < y-1; i++) map[1][i] = 2000;
+    // for (int i = 1; i < y-1; i++) map[x-2][i] = 2000;
+    // for (int i = 1; i < x-1; i++) map[i][1] = 2000;
+    // for (int i = 1; i < x-1; i++) map[i][y-2] = 2000;
+    map[x/2][y/2] = 5000;
 }
 
 void AddHeatwithMouse(int IsClicking, Window wind, double **map)
@@ -95,7 +95,6 @@ int main()
 
     while (!WindowShouldClose()) {
 	if (IsKeyDown(KEY_SPACE)) {BeginDrawing(); EndDrawing(); continue;}
-
 	AddHeatwithMouse(IsMouseButtonDown(MOUSE_BUTTON_LEFT), wind, T);
 
 	BeginDrawing();
@@ -156,62 +155,76 @@ int main()
 }
 
 /*
-* TODO: Find the right FDM2Cent3p2D for the differentes edge t_i-2,j-2 with i=0 and j=2 => t_-2,0
-* Here is are problems:
-* 
-* 1: The Most efficient method -> 1 buffer:
-*     [ a x x ] (a is the first pixel and b the last)
-*     [ x x x ]
-*     [ x x b ]
-* b(t=i) is calculated with a(t=i+1) and not a(t=i)
-* The real problem here, to solve this problem, is that we need two buffers that require a lot of memory.
-*
-* while(1) {
-*     double **T;
-*     for (int i = 0; i < HEIGHT; i++) {
-*         for (int j = 0; j < WIDTH; j++) {
-*             T[i][j] = T[i][j] + dt * heat_equation;
-*         }
-*     }
-* }
-*
-* 2: The Best visual one:
-*     2 buffer + 2 for loop to update 1 buffer
-*
-* while(1) {
-*     double **T;
-*     double **Tn;
-*     for (int i = 0; i < HEIGHT; i++) {
-*         for (int j = 0; j < WIDTH; j++) {
-*             Tn[i][j] = T[i][j] + dt * heat_equation;
-*         }
-*     }
-*     for (int i = 0; i < HEIGHT; i++) {
-*         for (int j = 0; j < WIDTH; j++) {
-*             T[i][j] = Tn[i][j];
-*         }
-*     }
-* }
-* 
-* 3: The Red-Black ordering (chessboard)
-*     1 buffer + 2 for loop to do the odd part
-*
-* while(1) {
-*     double **T;
-*     for (int i = 0; i < HEIGHT; i++) {
-*         for (int j = 0; j < WIDTH; j++) {
-*             if ((i+j)%2 == 0) {
-*                 T[i][j] = T[i][j] + dt * heat_equation;
-*             }
-*         }
-*     }
-*     for (int i = 0; i < HEIGHT; i++) {
-*         for (int j = 0; j < WIDTH; j++) {
-*             if ((i+j)%2 == 1) {
-*                 T = T + dt * heat_equation;
-*             }
-*         }
-*     }
-* }
-*
-*/
+ * TODO:
+ * - Add the Neumann bounderies conditions (T[0][j] = T[1][j] - q*dx)
+ *     if q == 0 then Insulating wall (adiabatic)
+ *     if q <  0 then Heat goes out of the domain
+ *     if q >  0 then Heat enters in the domain
+ *     Like:
+ *         for (int i = 0; i < N_x; i++) {
+ *             T[i][0] = T[i][1];
+ *         }
+ *         for (int j = 0; j < N_y; j++) {
+ *             T[0][j] = T[1][j] - q * dx;
+ *         }
+ * ...
+ * - Add the Robin bounderies conditions ...
+ * - Find the right FDM2Cent3p2D for the differentes edge t_i-2,j-2 with i=0 and j=2 => t_-2,0
+ * Here is are problems:
+ * 
+ * 1: The Most efficient method -> 1 buffer:
+ *     [ a x x ] (a is the first pixel and b the last)
+ *     [ x x x ]
+ *     [ x x b ]
+ * b(t=i) is calculated with a(t=i+1) and not a(t=i)
+ * The real problem here, to solve this problem, is that we need two buffers that require a lot of memory.
+ *
+ * while(1) {
+ *     double **T;
+ *     for (int i = 0; i < HEIGHT; i++) {
+ *         for (int j = 0; j < WIDTH; j++) {
+ *             T[i][j] = T[i][j] + dt * heat_equation;
+ *         }
+ *     }
+ * }
+ *
+ * 2: The Best visual one:
+ *     2 buffer + 2 for loop to update 1 buffer
+ *
+ * while(1) {
+ *     double **T;
+ *     double **Tn;
+ *     for (int i = 0; i < HEIGHT; i++) {
+ *         for (int j = 0; j < WIDTH; j++) {
+ *             Tn[i][j] = T[i][j] + dt * heat_equation;
+ *         }
+ *     }
+ *     for (int i = 0; i < HEIGHT; i++) {
+ *         for (int j = 0; j < WIDTH; j++) {
+ *             T[i][j] = Tn[i][j];
+ *         }
+ *     }
+ * }
+ * 
+ * 3: The Red-Black ordering (chessboard)
+ *     1 buffer + 2 for loop to do the odd part
+ *
+ * while(1) {
+ *     double **T;
+ *     for (int i = 0; i < HEIGHT; i++) {
+ *         for (int j = 0; j < WIDTH; j++) {
+ *             if ((i+j)%2 == 0) {
+ *                 T[i][j] = T[i][j] + dt * heat_equation;
+ *             }
+ *         }
+ *     }
+ *     for (int i = 0; i < HEIGHT; i++) {
+ *         for (int j = 0; j < WIDTH; j++) {
+ *             if ((i+j)%2 == 1) {
+ *                 T = T + dt * heat_equation;
+ *             }
+ *         }
+ *     }
+ * }
+ *
+ */
