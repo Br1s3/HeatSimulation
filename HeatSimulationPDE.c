@@ -62,8 +62,6 @@ void AddHeatwithMouse(int IsClicking, Window wind, double **map)
     }
 }
 
-// double HeatEquation(double t, double p, double v);
-
 int main()
 {
     InitWindow(WIDTH, HEIGHT, "Simulation of the Heat Equation");
@@ -88,7 +86,7 @@ int main()
  */
 
     const double dt = 0.1f;
-    const double dx = 0.1f;
+    const double dxy = 0.1f;
 
 #define DERICH
 // #define PERIODIC
@@ -124,7 +122,7 @@ int main()
 		{
 		    (void)t; (void)p; (void)v;
 		    // return alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
-		    return alpha * FDM2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
+		    return alpha * FDM2Cent5p2D(dxy, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
 		}
 		double Tnext = T[yb][xb];
 		double tmp;

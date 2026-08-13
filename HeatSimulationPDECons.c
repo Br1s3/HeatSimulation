@@ -54,7 +54,7 @@ int main()
     Window wind;
     SetMeshGrid(&wind, WIDTH, HEIGHT, MESHGRID);
 
-    GRAPHLIB_MALLOC2D(char, console, HEIGHT, WIDTH);
+    GRAPHLIB_MALLOC2D(char, console, WIDTH, HEIGHT);
 
     double pl[wind.y][wind.x];
     STAT_ALLOC(pl, T, double, wind.y);
@@ -66,8 +66,7 @@ int main()
     double Tmin = 0, Tmax = 20;
     double t = 0;
     const double dt = 0.1f;
-    const double dx = 0.1f;
-    // const double dy = 0.1f;
+    const double dxy = 0.1f;
     for (int i = 0; i < NB_FRAME; i++) {
 	ConsoleClear(console, WIDTH, HEIGHT, ' ');
 
@@ -78,13 +77,10 @@ int main()
 
 		PrintRectangle(console, WIDTH, HEIGHT, MESHOFFSET_X(wind, x), MESHOFFSET_X(wind, y), wind.grid, wind.grid, palette[Light]);
 
-		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dx, T[y+1][x], T[y][x+1], T[y][x], T[y][x-1], T[y-1][x]);
+		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dxy, T[y+1][x], T[y][x+1], T[y][x], T[y][x-1], T[y-1][x]);
 
 	    }
 	}
-	// PrintConsoleSpace(console, WIDTH, HEIGHT);
-	PrintConsole(console, WIDTH, HEIGHT);
-	// usleep(50000);
 
 	for (int y = 0; y < wind.y-0; y++) {
 	    for (int x = 0; x < wind.x-0; x++) {
@@ -92,9 +88,12 @@ int main()
 	    }
 	}
 	
-
 	pl[wind.y/2][wind.x/2] = 200;
-	
+	// PrintConsoleSpace(console, WIDTH, HEIGHT);
+	PrintConsolePadded(console, WIDTH, HEIGHT);
+	printf("t = %0.2lf    \n", t);
+	// usleep(50000);
+	t += dt;
 	// for (int i = 1; i < wind.y-1; i++) pl[i][1] = 20;
 	// for (int i = 1; i < wind.y-1; i++) pl[i][wind.x-2] = 20;
 	// for (int i = 1; i < wind.x-1; i++) pl[1][i] = 20;
