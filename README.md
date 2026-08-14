@@ -51,10 +51,10 @@ _Resolved with the FDM (Finit Difference Method)_:
 
 ## References
 
-- https://fr.wikipedia.org/wiki/%C3%89quation_de_la_chaleur
-- http://www.lmm.jussieu.fr/~lagree/COURS/MECAVENIR/cours4_eqchal_loc.pdf
+> - https://fr.wikipedia.org/wiki/%C3%89quation_de_la_chaleur
+> - http://www.lmm.jussieu.fr/~lagree/COURS/MECAVENIR/cours4_eqchal_loc.pdf
 (Simulation of laplacian)
-- https://visualpde.com/sim/
+> - https://visualpde.com/sim/
 
 _Website that render Latex_
 
@@ -66,20 +66,20 @@ _Website that render Latex_
 
 
 ## Math references:
-> https://fr.wikipedia.org/wiki/Laplacien_discret
-> https://fr.wikipedia.org/wiki/D%C3%A9riv%C3%A9e_seconde_discr%C3%A8te
-> https://fr.wikipedia.org/wiki/Diff%C3%A9rence_finie
-> https://en.wikipedia.org/wiki/Taylor_series
-> https://pythonnumericalmethods.studentorg.berkeley.edu/notebooks/chapter20.02-Finite-Difference-Approximating-Derivatives.html
-> https://en.wikipedia.org/wiki/Finite_difference_method
+> - https://fr.wikipedia.org/wiki/Laplacien_discret
+> - https://fr.wikipedia.org/wiki/D%C3%A9riv%C3%A9e_seconde_discr%C3%A8te
+> - https://fr.wikipedia.org/wiki/Diff%C3%A9rence_finie
+> - https://en.wikipedia.org/wiki/Taylor_series
+> - https://pythonnumericalmethods.studentorg.berkeley.edu/notebooks/chapter20.02-Finite-Difference-Approximating-Derivatives.html
+> - https://en.wikipedia.org/wiki/Finite_difference_method
 
 _All the coefficients_
-https://en.wikipedia.org/wiki/Finite_difference_coefficient
+> - https://en.wikipedia.org/wiki/Finite_difference_coefficient
 
 Stencil:
-> https://en.wikipedia.org/wiki/Stencil_(numerical_analysis)
-> https://en.wikipedia.org/wiki/Five-point_stencil#cite_note-1
-> https://en.wikipedia.org/wiki/Nine-point_stencil
+> - https://en.wikipedia.org/wiki/Stencil_(numerical_analysis)
+> - https://en.wikipedia.org/wiki/Five-point_stencil#cite_note-1
+> - https://en.wikipedia.org/wiki/Nine-point_stencil
 
 Here is the exemple for stencil
 Implicit method
