@@ -8,13 +8,30 @@
 [![ConsExemple](./picture/ASCIIExemple.png)](/picture)
 
 ## Heat equation
-
+_The solution of the heat equation:_
 ```math
 \begin{aligned}
 	T_{(x, y, t)} &= \sum_{\substack{n=1 \\ m=1}}^N \frac{4}{L_x L_y} \int\limits_0^{L_x} \int\limits_0^{L_y} f(\varphi, \psi) \sin\left(n \frac{\pi}{L_x} \varphi\right) \sin\left(m \frac{\pi}{L_y} \psi\right) \, \mathrm{d}\varphi \, \mathrm{d}\psi \sin\left(n \frac{\pi}{L_x} x\right) \sin\left(m \frac{\pi}{L_y} y\right) \mathrm{e}^{-\alpha t \pi^2 \left(\frac{n^2}{L_x^2} + \frac{m^2}{L_y^2}\right)}
 \end{aligned}
 ```
-Or
+
+_The differential equation of heat dissipation_
+```math
+\begin{aligned}
+	\frac{\partial T}{\partial t} &= \alpha \Delta^2 T
+\end{aligned}
+```
+
+
+
+_That bring us to the Heat PDE (Partial Differential Equation) in 2 dimension {x, y}_:
+```math
+\begin{aligned}
+	\frac{\partial T}{\partial t} &= \alpha \left( \frac{\partial T}{\partial x} + \frac{\partial T}{\partial y} \right)
+\end{aligned}
+```
+
+_Resolved with the FDM (Finit Difference Method)_:
 
 ```math
 \begin{aligned}
@@ -38,6 +55,10 @@ Or
 - http://www.lmm.jussieu.fr/~lagree/COURS/MECAVENIR/cours4_eqchal_loc.pdf
 (Simulation of laplacian)
 - https://visualpde.com/sim/
+
+_Website that render Latex_
+
+- https://quicklatex.com/
 
 ## TODO:
 - Add the console view

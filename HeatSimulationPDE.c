@@ -9,6 +9,12 @@
 #define MESHGRIDLIB_IMPLEMENTATION
 #include "meshgridlib.h"
 
+// #define DERICH
+#define PERIODIC
+#define STENCIL3P
+// #define STENCIL5P
+
+
 #define FPS 100
 #define MESHGRID 200
 #define WIDTH (16*100)
@@ -16,8 +22,10 @@
 
 #define alpha 0.01f
 
-#define BLACKPURPLE(x) (Color){(x)*0xff, 0x00, (x)*0xff, 0xff}
-#define BLUERED(x) (Color){0xff - (1-x)*0xff/2, 0x00, 0xff - (x)*0xff/2, 0xff}
+#define BLACKPURPLE(x)  (Color){(x)*0xff, 0x00, (x)*0xff, 0xff}
+#define BLUERED(x)      (Color){(x)*0xff, 0x00, (1-x)*0xff, 0xff}
+#define DARKBLUERED(x)  (Color){(x)*0xff/2, 0x00, (1-x)*0xff/2, 0xff}
+#define LIGHTBLUERED(x) (Color){(1+x)*0xff/2, 0x00, 0xff - (x)*0xff/2, 0xff}
 
 typedef struct {
     int x;
@@ -32,6 +40,8 @@ typedef struct {
 
 double norm(double x, double xmin, double xmax)
 {
+    if      (x > xmax) return xmax;
+    else if (x < xmin) return xmin;
     return (x - xmin)/(xmax - xmin);
 }
 
@@ -88,9 +98,8 @@ int main()
     const double dt = 0.1f;
     const double dxy = 0.1f;
 
-#define DERICH
-// #define PERIODIC
     char tab[30] = {' '};
+    char tab2[30] = {' '};
     snprintf(tab, 30, "ERROR: Calculation overflow");
     while (!WindowShouldClose()) {
 	if (IsKeyDown(KEY_SPACE)) {BeginDrawing(); EndDrawing(); continue;}
@@ -101,33 +110,59 @@ int main()
 	for (int y = 0; y < wind.y-0; y++) {
 	    for (int x = 0; x < wind.x-0; x++) {
 		double T_norm = norm(T[y][x], Tmin, Tmax);
-		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, BLUERED(T_norm));
+		DrawRectangle(MESHOFFSET_X(wind, x), MESHOFFSET_Y(wind, y), wind.grid, wind.grid, DARKBLUERED(T_norm));
 
 #ifdef DERICH
 		// Boundary condition: Derichlet -> T(t, 0, y) = T(t, x, 0) = 0
 		int xb = x, yb = y;
-		// if (yb < 1 || xb < 1 || xb > wind.x-2 || yb > wind.y-2) continue;
+# ifdef STENCIL3P
+		if (yb < 1 || xb < 1 || xb > wind.x-2 || yb > wind.y-2) continue;
+# elif defined(STENCIL5P)
 		if (yb < 2 || xb < 2 || xb > wind.x-3 || yb > wind.y-3) continue;
-#endif
-#ifdef PERIODIC
+# else
+# error ERROR: No stencil chosen
+# endif
+
+#elif defined(PERIODIC)
                 // Boundary condition: Periodic -> T[HEIGHT][x] <=> T[0][x] and T[y][WIDTH] <=> T[y][0]
 		int xb = x, yb = y;
+# ifdef STENCIL3P
 		if (yb-1 < 0)             yb = wind.y-2;
 		else if (yb+1 > wind.y-1) yb = 1;
 		if (xb-1 < 0)             xb = wind.x-2;
 		else if (xb+1 > wind.x-1) xb = 1;
+# elif defined(STENCIL5P)
+		if (yb-2 < 0)             yb = wind.y-3;
+		else if (yb-1 < 0)        yb = wind.y-2;
+		else if (yb+2 > wind.y-1) yb = 2;
+		else if (yb+1 > wind.y-1) yb = 1;
+		if (xb-2 < 0)             xb = wind.x-3;
+		else if (xb-1 < 0)        xb = wind.x-2;
+		else if (xb+2 > wind.x-1) xb = 2;
+		else if (xb+1 > wind.x-1) xb = 1;
+# else
+# error ERROR: No stencil chosen
+# endif
+
+#else
+#error ERROR: boundary condition not chosen
 #endif
 
 		double HeatEquation(double t, double p, double v)
 		{
 		    (void)t; (void)p; (void)v;
-		    // return alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
+#ifdef STENCIL3P
+		    return alpha * FDM2Cent3p2D(dxy, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
+#elif defined(STENCIL5P)
 		    return alpha * FDM2Cent5p2D(dxy, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
+#else
+#error ERROR: No stencil chosen
+#endif
 		}
 		double Tnext = T[yb][xb];
 		double tmp;
 		if (ExplicitEuler(dt, t, &tmp, &Tnext, HeatEquation) < 0)
-		    DrawText(tab, WIDTH/2-200, 10, 50, RED);
+		    DrawText(tab, WIDTH/2-400, HEIGHT/2, 50, RED);
 		Tn[y][x] = Tnext;
 		// Tn[y][x] = T[yb][xb] + dt * alpha * FDM2Cent3p2D(dx, T[yb+1][xb], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb-1][xb]);
 		// Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent5p2D(dx, T[yb+2][xb], T[yb+1][xb], T[yb][xb+2], T[yb][xb+1], T[yb][xb], T[yb][xb-1], T[yb][xb-2], T[yb-1][xb], T[yb-2][xb]);
@@ -142,15 +177,15 @@ int main()
 	    }
 	}
 	
-	snprintf(tab, 15, "t = %.2lf", t);
+	snprintf(tab2, 15, "t = %.2lf", t);
 	t += dt;
-	DrawText(tab, 20, 40, 20, GREEN);
+	DrawText(tab2, 20, 40, 20, GREEN);
 	DrawFPS(10, 10);
 	EndDrawing();
-	// for (int i = 1; i < wind.y-1; i++) T[i][1] = 2000;
-	// for (int i = 1; i < wind.y-1; i++) T[i][wind.x-2] = 2000;
-	// for (int i = 1; i < wind.x-1; i++) T[1][i] = 2000;
-	// for (int i = 1; i < wind.x-1; i++) T[wind.y-2][i] = 2000;
+	for (int i = 1; i < wind.y-1; i++) T[i][1] = 20;
+	for (int i = 1; i < wind.y-1; i++) T[i][wind.x-2] = 20;
+	for (int i = 1; i < wind.x-1; i++) T[1][i] = 20;
+	for (int i = 1; i < wind.x-1; i++) T[wind.y-2][i] = 20;
     }
     
     return 0;
@@ -158,7 +193,7 @@ int main()
 
 /*
  * TODO:
- * - Add the Neumann bounderies conditions (T[0][j] = T[1][j] - q*dx)
+ * - Add the Neumann boundaries conditions (T[0][j] = T[1][j] - q*dx)
  *     if q == 0 then Insulating wall (adiabatic)
  *     if q <  0 then Heat goes out of the domain
  *     if q >  0 then Heat enters in the domain
@@ -170,7 +205,7 @@ int main()
  *             T[0][j] = T[1][j] - q * dx;
  *         }
  * ...
- * - Add the Robin bounderies conditions ...
+ * - Add the Robin boundaries conditions ...
  * - Find the right FDM2Cent3p2D for the differentes edge t_i-2,j-2 with i=0 and j=2 => t_-2,0
  * Here is are problems:
  *
