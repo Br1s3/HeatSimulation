@@ -7,8 +7,9 @@
 #define MESHGRIDLIB_IMPLEMENTATION
 #include "meshgridlib.h"
 
-#define GRAPHLIB_IMPLEMENTATION
-#include "graphlib.h"
+#define GLIPH_CHARPADDED
+#define GLIPH_IMPLEMENTATION
+#include "gliph.h"
 
 #define NB_FRAME 1000
 #define MESHGRID 100
@@ -54,7 +55,7 @@ int main()
     Window wind;
     SetMeshGrid(&wind, WIDTH, HEIGHT, MESHGRID);
 
-    GRAPHLIB_MALLOC2D(char, console, WIDTH, HEIGHT);
+    GLIPH_ALLOC(console, WIDTH, HEIGHT);
 
     double pl[wind.y][wind.x];
     STAT_ALLOC(pl, T, double, wind.y);
@@ -68,14 +69,14 @@ int main()
     const double dt = 0.1f;
     const double dxy = 0.1f;
     for (int i = 0; i < NB_FRAME; i++) {
-	ConsoleClear(console, WIDTH, HEIGHT, ' ');
+	ConsoleClear(console, ' ');
 
 	for (int y = 1; y < wind.y-1; y++) {
 	    for (int x = 1; x < wind.x-1; x++) {
 		double T_norm = norm(T[y][x], Tmin, Tmax);
 		int Light = (int)(T_norm*(sizeof(palette)-1))%sizeof(palette);
 
-		PrintRectangle(console, WIDTH, HEIGHT, MESHOFFSET_X(wind, x), MESHOFFSET_X(wind, y), wind.grid, wind.grid, palette[Light]);
+		PrintRectangle(console, MESHOFFSET_X(wind, x), MESHOFFSET_X(wind, y), wind.grid, wind.grid, palette[Light]);
 
 		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dxy, T[y+1][x], T[y][x+1], T[y][x], T[y][x-1], T[y-1][x]);
 
@@ -89,7 +90,7 @@ int main()
 	}
 	
 	pl[wind.y/2][wind.x/2] = 200;
-	PrintConsolePadded(console, WIDTH, HEIGHT);
+	PrintConsole(console);
 	printf("t = %0.2lf    \n", t);
 	// usleep(50000);
 	t += dt;
@@ -98,7 +99,7 @@ int main()
 	// for (int i = 1; i < wind.x-1; i++) pl[1][i] = 20;
 	// for (int i = 1; i < wind.x-1; i++) pl[wind.y-2][i] = 20;
     }
-    GRAPHLIB_FREE2D(console, HEIGHT);
+    GLIPH_FREE(console);
     return 0;
 }
 
