@@ -19,6 +19,7 @@
 #define alpha 0.01f
 #define UNUSED(x) (void)x
 
+#define CHAR_COLORED
 
 #define STAT_ALLOC(src, dest, type, h)			\
     type *dest[h];					\
@@ -26,10 +27,10 @@
 	for (int i = 0; i < (h); i++) dest[i] = src[i];	\
     } while (0)
 
-
 // char palette[] = {' ', '`', '.', ':', ';', '*', '!', '/', '^', 'o', 'O', 'G', 'M', '%', '#', '@'};
-char palette[] = {' ', '`', '.', ':', ';', ',', '-', '~', '_', '^','"', '\'', '!', '/', '\\', '|', '(', ')', '[', ']','{', '}', '<', '>', '+', '=', '*', 'x', 'X', 'o','O', '0', 'Q', 'D', 'B', 'P', 'M', 'W', '&', '$','8', '9', '#', '%', '@', 'A', 'K', 'R', 'U', 'Z'};
 // char palette[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+
+char palette[] = {' ', '`', '.', ',', ':', ';', '!', 'i', 'l', 'I', '|', '/', '\\', 'r', 'c', 'v', 'x', 'z', 'u', 'n', 'o', 'e', 'a', 'h', 'k', 'b', 'd', 'p', 'q', 'w', 'm', 'A', 'U', 'J', 'C', 'L', 'Q', 'O', 'Z', 'X', '0', '#', 'M', 'W', '&', '8', '%', 'B', '@'};
 
 double norm(double x, double xmin, double xmax)
 {
@@ -63,24 +64,36 @@ int main()
     double plnew[wind.y][wind.x];
     STAT_ALLOC(plnew, Tn, double, wind.y);
     map_init(Tn, wind.x, wind.y);
+    // pl[wind.y/2][wind.x/2] = 200;
 
     double Tmin = 0, Tmax = 20;
     double t = 0;
     const double dt = 0.1f;
     const double dxy = 0.1f;
     for (int i = 0; i < NB_FRAME; i++) {
+#ifdef CHAR_COLORED
+	MOVETO_GLIPH(0,0);
+#else
 	ConsoleClear(console, ' ');
-
-	for (int y = 1; y < wind.y-1; y++) {
-	    for (int x = 1; x < wind.x-1; x++) {
+#endif
+	for (int y = 0; y < wind.y; y++) {
+	    for (int x = 0; x < wind.x; x++) {
 		double T_norm = norm(T[y][x], Tmin, Tmax);
+#ifdef CHAR_COLORED
+		int Light = (int)(T_norm*(24-1))%24;
+		PRINT_BG_GRAYSHADE(Light, ' ');
+		PRINT_BG_GRAYSHADE(Light, ' ');
+#else
 		int Light = (int)(T_norm*(sizeof(palette)-1))%sizeof(palette);
-
 		PrintRectangle(console, MESHOFFSET_X(wind, x), MESHOFFSET_X(wind, y), wind.grid, wind.grid, palette[Light]);
-
+#endif
+                if (y == 0 || y == wind.y-1 || x == 0 || x == wind.x-1) continue;
 		Tn[y][x] = T[y][x] + dt * alpha * FDM2Cent3p2D(dxy, T[y+1][x], T[y][x+1], T[y][x], T[y][x-1], T[y-1][x]);
 
 	    }
+#ifdef CHAR_COLORED
+	    putchar('\n');
+#endif
 	}
 
 	for (int y = 0; y < wind.y-0; y++) {
@@ -88,16 +101,16 @@ int main()
 		T[y][x] = Tn[y][x];
 	    }
 	}
-	
-	pl[wind.y/2][wind.x/2] = 200;
+#ifndef CHAR_COLORED
 	PrintConsole(console);
+#endif
 	printf("t = %0.2lf    \n", t);
-	// usleep(50000);
+	usleep(50000);
 	t += dt;
-	// for (int i = 1; i < wind.y-1; i++) pl[i][1] = 20;
-	// for (int i = 1; i < wind.y-1; i++) pl[i][wind.x-2] = 20;
-	// for (int i = 1; i < wind.x-1; i++) pl[1][i] = 20;
-	// for (int i = 1; i < wind.x-1; i++) pl[wind.y-2][i] = 20;
+	for (int i = 1; i < wind.y-1; i++) pl[i][1] = 20;
+	for (int i = 1; i < wind.y-1; i++) pl[i][wind.x-2] = 20;
+	for (int i = 1; i < wind.x-1; i++) pl[1][i] = 20;
+	for (int i = 1; i < wind.x-1; i++) pl[wind.y-2][i] = 20;
     }
     GLIPH_FREE(console);
     return 0;
